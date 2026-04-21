@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+<head><script>
+(async function(){
+  function sha256(str){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(str)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));}
+  const stored=sessionStorage.getItem('mh_auth');
+  if(!stored||stored!=='4fdbdd4f0fac3fe007b5cc199d56b3cb4e8c1db5ac61ad86507da0dd195201a7'){window.location.href='index.html';}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Merci Handy — Dashboard</title>
@@ -185,7 +191,6 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:10px 32px;dis
     <button class="sb" id="sv-cat" onclick="siview('cat',this)">Par catégorie</button>
     <button class="sb" id="sv-wscat" onclick="siview('wscat',this)">Wholesale · catégorie</button>
     <button class="sb" id="sv-client" onclick="siview('client',this)">🔍 Recherche client</button>
-    <button class="sb" id="sv-ytd" onclick="siview('ytd',this)">📅 YTD vs N-1</button>
   </div>
   <div id="sv-canal-view">
     <div class="card fw">
@@ -205,25 +210,6 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:10px 32px;dis
       <div class="card"><div class="ct">SI Wholesale par catégorie — période</div><canvas id="siCatDonut" height="215"></canvas></div>
     </div>
   </div>
-  <!-- YTD VIEW -->
-  <div id="sv-ytd-view" style="display:none">
-    <div class="kpis" id="kytd" style="margin-bottom:14px"></div>
-    <div class="g2">
-      <div class="card">
-        <div class="ct">CA Sell-in — YTD vs N-1 · tous canaux <span class="bge bsi">mensuel</span></div>
-        <canvas id="ytdBarChart" height="210"></canvas>
-      </div>
-      <div class="card">
-        <div class="ct">Cumul YTD vs N-1 <span class="bge bsi">courbe cumulative</span></div>
-        <canvas id="ytdCumChart" height="210"></canvas>
-      </div>
-    </div>
-    <div class="card fw">
-      <div class="ct">Détail par canal — YTD vs N-1 <span class="bge bsi">+ évolution %</span></div>
-      <canvas id="ytdChannelChart" height="145"></canvas>
-    </div>
-  </div>
-
   <div id="sv-cat-view" style="display:none">
     <div class="card fw"><div class="ct">SI mensuel par catégorie — tous canaux <span class="bge bsi">vs N-1</span></div><canvas id="siCatChart" height="165"></canvas></div>
     <div class="g2">
@@ -625,7 +611,6 @@ function buildSI(){
   else if(curSIView==='cat')buildCatView(false);
   else if(curSIView==='wscat')buildCatView(true);
   else if(curSIView==='client')buildCITop();
-  else if(curSIView==='ytd')buildYTD();
 }
 function buildSIPartnerTable(){
   const M=ms(),MP=mp();
@@ -661,7 +646,7 @@ function siview(view,btn){
   curSIView=view;
   document.querySelectorAll('[id^="sv-"]').forEach(b=>{if(b.classList.contains('sb'))b.classList.remove('on');});
   btn.classList.add('on');
-  ['canal','cat','wscat','client','ytd'].forEach(v=>{
+  ['canal','cat','wscat','client'].forEach(v=>{
     const el=document.getElementById(`sv-${v}-view`);
     if(el)el.style.display=(v===view)?'':'none';
   });
@@ -669,7 +654,6 @@ function siview(view,btn){
   else if(view==='cat')buildCatView(false);
   else if(view==='wscat')buildCatView(true);
   else if(view==='client'){document.getElementById('ciDetail').style.display='none';document.getElementById('ciTop').style.display='block';document.getElementById('ciAC').style.display='none';document.getElementById('ciInput').value='';buildCITop();}
-  else if(view==='ytd') buildYTD();
 }
 
 function buildCatView(ws){
@@ -1318,89 +1302,6 @@ function buildPaysMonthly() {
     }
   );
 }
-
-
-// ===== YTD vs N-1 =====
-function buildYTD() {
-  // YTD = Jan 1 of current year to latest available month
-  // Detect "current year" from CUR.f or default to max year in data
-  const allY = [...new Set(D.months.map(m => m.slice(0,4)))].sort();
-  const curY = CUR.t.slice(0,4);  // year of period end
-  const prevY = String(+curY - 1);
-
-  // YTD months = all months of curY up to CUR.t
-  const ytdM  = D.months.filter(m => m.startsWith(curY) && m <= CUR.t);
-  // N-1 = same months but previous year
-  const ytdMP = ytdM.map(m => prevY + m.slice(4));
-
-  const chs = ['Wholesale','D2C','Amazon','B2B'];
-
-  const ytdTotal  = ytdM.reduce((a,m) => a + chs.reduce((x,c) => x + siS(c,m), 0), 0);
-  const ytdTotalP = ytdMP.reduce((a,m) => a + chs.reduce((x,c) => x + siS(c,m), 0), 0);
-  const ytdGM     = ytdM.reduce((a,m) => a + chs.reduce((x,c) => x + siGM(c,m), 0), 0);
-  const ytdGMp    = ytdMP.reduce((a,m) => a + chs.reduce((x,c) => x + siGM(c,m), 0), 0);
-  const ytdGP     = ytdTotal > 0 ? ytdGM/ytdTotal*100 : 0;
-  const ytdGPp    = ytdTotalP > 0 ? ytdGMp/ytdTotalP*100 : 0;
-
-  // Per channel YTD
-  const chData = chs.map(c => ({
-    ch: c,
-    cy: ytdM.reduce((a,m) => a + siS(c,m), 0),
-    py: ytdMP.reduce((a,m) => a + siS(c,m), 0),
-  }));
-
-  // KPIs
-  document.getElementById('kytd').innerHTML =
-    `<div class="kpi si"><div class="kpi-lbl">SI Total YTD ${curY}</div><div class="kpi-val">${fmtK(ytdTotal)}€</div><div class="kpi-sub">${ytdM.length} mois · Jan→${MN[+CUR.t.slice(5)-1]}</div>${evolHTML(ytdTotal,ytdTotalP)}</div>` +
-    `<div class="kpi si"><div class="kpi-lbl">SI YTD N-1 (${prevY})</div><div class="kpi-val">${fmtK(ytdTotalP)}€</div><div class="kpi-sub">Même période</div></div>` +
-    `<div class="kpi gm"><div class="kpi-lbl">GM1 YTD ${curY}</div><div class="kpi-val">${fmtK(ytdGM)}€</div><div class="kpi-sub">${ytdGP.toFixed(1)}%</div>${evolHTML(ytdGM,ytdGMp)}</div>` +
-    chData.slice(0,2).map(d =>
-      `<div class="kpi nt"><div class="kpi-lbl">${d.ch} YTD</div><div class="kpi-val">${fmtK(d.cy)}€</div>${evolHTML(d.cy,d.py)}</div>`
-    ).join('');
-
-  // Labels
-  const L = ytdM.map(m => MN[+m.slice(5)-1]);
-
-  // Monthly bar chart CY vs PY
-  const cyVals = ytdM.map(m => chs.reduce((a,c) => a + siS(c,m), 0));
-  const pyVals = ytdMP.map(m => chs.reduce((a,c) => a + siS(c,m), 0));
-
-  const el1 = document.getElementById('ytdBarChart');
-  if(el1._c){el1._c.destroy();el1._c=null;}
-  el1._c = new Chart(el1, {type:'bar', data:{labels:L, datasets:[
-    {label:`${prevY} (N-1)`, data:pyVals, backgroundColor:CC.si+'33', borderColor:CC.si+'88', borderWidth:1.5, borderRadius:2},
-    {label:`${curY} (YTD)`, data:cyVals, backgroundColor:CC.p1+'88', borderColor:CC.p1, borderWidth:1.5, borderRadius:2},
-  ]}, options:{...BO, plugins:{...BO.plugins, legend:{display:true, labels:{color:CC.dm, font:{size:9}, boxWidth:8, padding:8}}}}});
-
-  // Cumulative line chart
-  let cumCY = 0, cumPY = 0;
-  const cumCYvals = cyVals.map(v => (cumCY += v, cumCY));
-  const cumPYvals = pyVals.map(v => (cumPY += v, cumPY));
-
-  mk('ytdCumChart','line',L,[
-    {label:`Cumul ${prevY}`, data:cumPYvals, borderColor:CC.si+'88', backgroundColor:'transparent', borderWidth:1.5, borderDash:[4,3], tension:.3, pointRadius:2},
-    {label:`Cumul ${curY}`, data:cumCYvals, borderColor:CC.p1, backgroundColor:CC.p1+'15', borderWidth:2.5, tension:.3, fill:true, pointRadius:3, pointBackgroundColor:CC.p1},
-  ],{plugins:{...BO.plugins, legend:{display:true, labels:{color:CC.dm, font:{size:9}, boxWidth:8, padding:8}}}});
-
-  // Channel grouped bars
-  const el3 = document.getElementById('ytdChannelChart');
-  if(el3._c){el3._c.destroy();el3._c=null;}
-  el3._c = new Chart(el3, {type:'bar', data:{labels:chs, datasets:[
-    {label:`${prevY} N-1`, data:chData.map(d=>d.py), backgroundColor:chs.map(c=>(CH_C[c]||'#888')+'44'), borderColor:chs.map(c=>CH_C[c]||'#888'), borderWidth:1.5, borderRadius:3},
-    {label:`${curY} YTD`, data:chData.map(d=>d.cy), backgroundColor:chs.map(c=>(CH_C[c]||'#888')+'99'), borderColor:chs.map(c=>CH_C[c]||'#888'), borderWidth:2, borderRadius:3},
-    {label:'Evol %', data:chData.map(d=>d.py>0?Math.round((d.cy-d.py)/d.py*100):null), type:'line', yAxisID:'y2',
-      borderColor:CC.p1, backgroundColor:'transparent', borderWidth:2, pointRadius:5,
-      pointBackgroundColor:chData.map(d=>d.cy>=d.py?CC.gm:CC.dn), pointBorderColor:'transparent', tension:0},
-  ]}, options:{...BO,
-    plugins:{...BO.plugins, legend:{display:true, labels:{color:CC.dm, font:{size:9}, boxWidth:8, padding:8}},
-      tooltip:{...BO.plugins.tooltip, callbacks:{label:ctx=>{
-        if(ctx.dataset.label==='Evol %') return ` Evol: ${ctx.raw>0?'+':''}${ctx.raw}%`;
-        return ` ${ctx.dataset.label}: ${fmtK(ctx.raw)}€`;
-      }}}},
-    scales:{x:BO.scales.x, y:{...BO.scales.y,position:'left'},
-      y2:{position:'right', grid:{display:false}, ticks:{color:CC.p1, font:{size:9}, callback:v=>(v>0?'+':'')+v+'%'}}}}});
-}
-
 
 // ===== ROUTING =====
 function go(id){
