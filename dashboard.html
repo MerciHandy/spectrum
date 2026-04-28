@@ -173,7 +173,6 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:10px 32px;dis
 <div class="tabs">
   <div class="tab on" onclick="go('si')">Sell-in</div>
   <div class="tab" onclick="go('so')">Sell-out</div>
-  <div class="tab" onclick="go('sep')">Sephora 🛍️</div>
   <div class="tab" onclick="go('gm')">Marge GM1</div>
   <div class="tab" onclick="go('sku')">Top SKUs</div>
   <div class="tab" onclick="go('eco')">Écoulement</div>
@@ -386,6 +385,46 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:10px 32px;dis
     <div class="card"><div class="ct">Quantités vendues / semaine <span class="bge bmh">vs N-1</span></div><canvas id="swQty" height="200"></canvas></div>
     <div class="card"><div class="ct">Panier moyen (€/unité)</div><canvas id="swPanier" height="200"></canvas></div>
   </div>
+
+  <!-- SÉPARATION -->
+  <div style="border-top:1px solid var(--bd);margin:20px 0 16px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dm);white-space:nowrap">DÉTAIL SELL-OUT SEPHORA</span>
+    <div style="flex:1;height:1px;background:var(--bd)"></div>
+  </div>
+
+  <!-- SKU + Catégorie inline -->
+  <div class="g2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="ct">Top SKUs Sephora — SO €
+        <div class="sel" id="sepSkuViewBtns">
+          <button class="sb on" onclick="setSepSkuView('chart',this)">Graphique</button>
+          <button class="sb" onclick="setSepSkuView('table',this)">Tableau</button>
+        </div>
+      </div>
+      <div id="sepSkuView-chart"><canvas id="sepSkuChart" height="240"></canvas></div>
+      <div id="sepSkuView-table" style="display:none">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>SKU</th><th class="r">SO €</th><th class="r">Unités</th><th>Part</th></tr></thead>
+          <tbody id="sepSkuBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">Répartition par catégorie <span class="bge bso">période sélectionnée</span></div>
+      <canvas id="sepCatDonut" height="240"></canvas>
+    </div>
+  </div>
+
+  <div class="card fw" style="margin-bottom:12px">
+    <div class="ct">SO Sephora mensuel par catégorie <span class="bge bso">empilé · période</span></div>
+    <canvas id="sepCatMonthChart" height="145"></canvas>
+  </div>
+
+  <div class="card fw">
+    <div class="ct">Top 5 SKUs — évolution mensuelle SO €</div>
+    <canvas id="sepSkuMonthChart" height="145"></canvas>
+  </div>
+
 </div>
 
 <!-- PAR PAYS -->
@@ -530,70 +569,6 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:10px 32px;dis
   <div class="card fw">
     <div class="ct">CA D2C mensuel par catégorie <span class="bge" style="background:rgba(100,181,246,.12);color:#64b5f6">empilé</span></div>
     <canvas id="d2cCatMonthChart" height="145"></canvas>
-  </div>
-</div>
-
-<!-- SEPHORA DETAIL -->
-<div class="pg" id="pg-sep">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-    <div style="display:flex;align-items:center;gap:14px">
-      <img id="sepLogoDetail" height="28" style="mix-blend-mode:screen;object-fit:contain">
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--so)">Sephora — Sell-out détail</div>
-        <div style="font-size:10px;color:var(--dm);margin-top:2px">Par SKU · par catégorie · évolution mensuelle</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:6px" id="sepYearBtns">
-      <button class="sw-btn on" onclick="setSepYear('all',this)">Toutes années</button>
-      <button class="sw-btn" onclick="setSepYear('2023',this)">2023</button>
-      <button class="sw-btn" onclick="setSepYear('2024',this)">2024</button>
-      <button class="sw-btn" onclick="setSepYear('2025',this)">2025</button>
-      <button class="sw-btn" onclick="setSepYear('2026',this)">2026 YTD</button>
-    </div>
-  </div>
-
-  <!-- KPIs par année -->
-  <div id="sepKPIs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px"></div>
-
-  <!-- Trend mensuel -->
-  <div class="card fw" style="margin-bottom:12px">
-    <div class="ct">SO Sephora mensuel <span class="bge bso">vs N-1 pointillée</span></div>
-    <canvas id="sepTrendChart" height="130"></canvas>
-  </div>
-
-  <!-- SKU + Catégorie -->
-  <div class="g2" style="margin-bottom:12px">
-    <div class="card">
-      <div class="ct">Top SKUs Sephora — SO €
-        <div class="sel" id="sepSkuViewBtns">
-          <button class="sb on" onclick="setSepSkuView('chart',this)">Graphique</button>
-          <button class="sb" onclick="setSepSkuView('table',this)">Tableau</button>
-        </div>
-      </div>
-      <div id="sepSkuView-chart"><canvas id="sepSkuChart" height="230"></canvas></div>
-      <div id="sepSkuView-table" style="display:none">
-        <table class="tbl">
-          <thead><tr><th>#</th><th>SKU</th><th class="r">SO €</th><th class="r">Unités</th><th>Part</th></tr></thead>
-          <tbody id="sepSkuBody"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct">Répartition par catégorie — période</div>
-      <canvas id="sepCatDonut" height="230"></canvas>
-    </div>
-  </div>
-
-  <!-- Évolution par catégorie -->
-  <div class="card fw" style="margin-bottom:12px">
-    <div class="ct">SO Sephora mensuel par catégorie <span class="bge bso">empilé</span></div>
-    <canvas id="sepCatMonthChart" height="145"></canvas>
-  </div>
-
-  <!-- Top SKUs mensuel (top 5) -->
-  <div class="card fw">
-    <div class="ct">Top 5 SKUs — évolution mensuelle SO €</div>
-    <canvas id="sepSkuMonthChart" height="145"></canvas>
   </div>
 </div>
 
@@ -1274,6 +1249,8 @@ function buildSW(){
   mk('swPanier','line',labels,[
     {label:'Panier '+y,data:panier,borderColor:CC.so,backgroundColor:CC.so+'22',borderWidth:2,tension:.3,fill:true,pointRadius:3,pointBackgroundColor:CC.so}
   ],{scales:{x:BO.scales.x,y:{...BO.scales.y,ticks:{...BO.scales.y.ticks,callback:v=>v+'€'}}}});
+
+  buildSepSKUCat();
 }
 
 function getCC(c) { return COUNTRY_COLORS[c] || '#888'; }
@@ -1688,11 +1665,73 @@ function setSepSkuView(v, btn) {
 }
 
 function getSepMonths() {
-  if (curSepYear === 'all') return ms();
-  return ms().filter(m => m.startsWith(curSepYear));
+  return ms(); // uses global CUR period
 }
 function getSepMonthsPrev() {
-  return getSepMonths().map(m => { const [y,mo]=m.split('-'); return `${+y-1}-${mo}`; });
+  return mp();
+}
+
+function setSepSkuView(v, btn) {
+  document.querySelectorAll('#sepSkuViewBtns .sb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('sepSkuView-chart').style.display = v==='chart' ? '' : 'none';
+  document.getElementById('sepSkuView-table').style.display = v==='table' ? '' : 'none';
+}
+
+function buildSepSKUCat() {
+  if (typeof SEP === 'undefined') return;
+  const M = ms(), MP = mp();
+  const L2 = M.map(m => { const [y,mo]=m.split('-'); return MN[+mo-1]+(M.length>14?"'"+y.slice(2):''); });
+
+  // SKU data filtered by period
+  const skuScored = SEP.sku_list.map(s => {
+    const sv = M.reduce((a,m) => a+(SEP.sku_monthly[s.n]?.[m]||0), 0) || s.s * (M.length / SEP.all_months.length);
+    return {...s, ps: sv};
+  }).sort((a,b) => b.ps-a.ps);
+  const total = skuScored.reduce((a,s) => a+s.ps, 0);
+
+  // SKU chart top 12 horizontal
+  const top12 = skuScored.slice(0,12);
+  const skuLabels = top12.map(s => s.n.replace('MH-GEL-30-','').replace('-EU-19','').replace('-EU','').replace('-19',''));
+  mk('sepSkuChart','bar',skuLabels,[
+    {data:top12.map(s=>s.ps), backgroundColor:CC.so+'66', borderColor:CC.so, borderWidth:2, borderRadius:4}
+  ],{indexAxis:'y', scales:{x:{...BO.scales.x,ticks:{...BO.scales.x.ticks,callback:v=>fmtK(v)+'€'}},y:{grid:{display:false},ticks:{color:CC.dm,font:{size:9}}}},
+    plugins:{...BO.plugins,tooltip:{...BO.plugins.tooltip,callbacks:{label:ctx=>' SO: '+fmtK(ctx.raw)+'€ · '+pct(ctx.raw,total)+'%'}}}});
+
+  // SKU table
+  const tb = document.getElementById('sepSkuBody'); if(!tb) return;
+  tb.innerHTML='';
+  skuScored.slice(0,20).forEach((s,i) => {
+    tb.innerHTML += '<tr><td class="rk">'+(i+1)+'</td><td class="sku" style="font-size:10px">'+s.n+'</td>'
+      +'<td class="r">'+fmt(s.ps)+'€</td><td class="r">'+fmt(s.q)+'</td>'
+      +'<td style="min-width:70px"><div class="bfill"><div class="btrack"><div class="binner" style="width:'+pct(s.ps,total*1.05)+'%;background:var(--so)"></div></div><span style="font-size:10px;color:var(--dm)">'+pct(s.ps,total)+'%</span></div></td></tr>';
+  });
+
+  // Cat donut
+  const catVals = SEP.cat_list.map(c => M.reduce((a,m) => a+(SEP.cat_monthly[c.n]?.[m]||0),0));
+  const actC = SEP.cat_list.map(c=>c.n).filter((_,i)=>catVals[i]>0);
+  const actV = catVals.filter(v=>v>0);
+  if(actC.length) mk('sepCatDonut','doughnut',actC,[{data:actV,
+    backgroundColor:actC.map(c=>(CAT_C[c]||'#888')+'bb'),borderColor:actC.map(c=>CAT_C[c]||'#888'),borderWidth:1.5}],
+    {cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:CC.dm,font:{size:9},boxWidth:7,padding:6}},
+      tooltip:{...BO.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.label}: ${fmtK(ctx.raw)}€ (${pct(ctx.raw,actV.reduce((a,b)=>a+b,0))}%)`}}},scales:{x:{display:false},y:{display:false}}});
+
+  // Cat monthly stacked
+  const cats = SEP.cat_list.map(c=>c.n).filter(c=>c&&c!=='nan');
+  mk('sepCatMonthChart','bar',L2,cats.map(c=>({
+    label:c, data:M.map(m=>SEP.cat_monthly[c]?.[m]||0),
+    backgroundColor:(CAT_C[c]||'#888')+'88',borderColor:CAT_C[c]||'#888',borderWidth:1,borderRadius:2
+  })),{scales:{x:{...BO.scales.x,stacked:true},y:{...BO.scales.y,stacked:true}},
+    plugins:{...BO.plugins,legend:{display:true,labels:{color:CC.dm,font:{size:9},boxWidth:8,padding:7}}}});
+
+  // Top 5 SKUs monthly lines
+  const top5 = skuScored.slice(0,5);
+  mk('sepSkuMonthChart','line',L2,top5.map((s,i)=>({
+    label:s.n.replace('MH-GEL-30-','').replace('-EU-19','').replace('-EU',''),
+    data:M.map(m=>SEP.sku_monthly[s.n]?.[m]||0),
+    borderColor:[CC.so,CC.p1,CC.gm,CC.nt,CC.si][i],
+    backgroundColor:'transparent',borderWidth:2,tension:.3,pointRadius:2
+  })),{plugins:{...BO.plugins,legend:{display:true,labels:{color:CC.dm,font:{size:9},boxWidth:8,padding:8}}}});
 }
 
 function buildSepDetail() {
@@ -1799,10 +1838,9 @@ function render(id){
   else if(id==='gm')buildGM();
   else if(id==='sku')buildSKU();
   else if(id==='eco')buildEco();
-  else if(id==='sw')buildSW();
+  else if(id==='sw'){buildSW();buildSepSKUCat();}
   else if(id==='pays')buildPays();
   else if(id==='d2c')buildD2C();
-  else if(id==='sep')buildSepDetail();
 }
 function refresh(){syncSel();render(curPage);}
 
