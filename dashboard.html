@@ -24,7 +24,7 @@
 body{background:linear-gradient(135deg,#FFF9F5 0%, #FFF4F7 45%, #F4F9FF 100%);color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;-webkit-font-smoothing:antialiased;min-height:100vh}
 
 /* NAV */
-.hdr{background:linear-gradient(135deg,#FFFFFF 0%, #FFF4F7 100%);border-bottom:1px solid var(--bd);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;backdrop-filter:blur(12px)}
+.hdr{background:linear-gradient(135deg,#FFFFFF 0%, #FFF4F7 100%);border-bottom:1px solid var(--bd);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;backdrop-filter:blur(12px)}
 .bname{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--p1),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .bsep{width:1px;height:18px;background:var(--bd);margin:0 12px}
 .bsub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dm)}
@@ -32,7 +32,7 @@ body{background:linear-gradient(135deg,#FFF9F5 0%, #FFF4F7 45%, #F4F9FF 100%);co
 .hdr-r small{display:block;color:var(--dm);margin-top:2px;font-size:9px}
 
 /* PERIOD BAR */
-.pbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:9px 32px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;top:53px;z-index:299;backdrop-filter:blur(12px)}
+.pbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;top:46px;z-index:299;backdrop-filter:blur(12px)}
 .plbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dm)}
 .pbtn{padding:4px 12px;font-size:9px;font-weight:700;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--dm);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
 .pbtn:hover{color:var(--tx);border-color:var(--p1)}
@@ -42,38 +42,38 @@ select{background:var(--sf2);border:1px solid var(--bd2);color:var(--tx);font-fa
 select:focus{outline:none;border-color:var(--p1)}
 
 /* TABS */
-.tabs{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 32px;display:flex;overflow-x:auto;position:sticky;top:94px;z-index:298;backdrop-filter:blur(12px)}
-.tab{padding:10px 18px;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;color:var(--dm);border-bottom:2.5px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.tabs{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;display:flex;overflow-x:auto;position:sticky;top:84px;z-index:298;backdrop-filter:blur(12px)}
+.tab{padding:8px 14px;font-size:10px;font-weight:700;letter-spacing:.3px;cursor:pointer;color:var(--dm);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .tab:hover{color:var(--tx)}.tab.on{color:var(--p1);border-bottom-color:var(--p1)}
 
 /* MAIN */
-.main{padding:22px 32px}
+.main{padding:14px 24px}
 .pg{display:none}.pg.on{display:block}
 
 /* KPI */
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
-.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative}
-.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;position:relative}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0}
 .kpi.si::after{background:linear-gradient(90deg,var(--si),#ffb347)}
 .kpi.so::after{background:linear-gradient(90deg,var(--so),#f5a623)}
 .kpi.gm::after{background:linear-gradient(90deg,var(--gm),#4dd9a0)}
 .kpi.nt::after{background:linear-gradient(90deg,var(--p1),var(--p2))}
-.kpi-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dm);margin-bottom:5px}
-.kpi-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;line-height:1}
+.kpi-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm);margin-bottom:3px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;line-height:1}
 .kpi.si .kpi-val{color:var(--si)}.kpi.so .kpi-val{color:var(--so)}.kpi.gm .kpi-val{color:var(--gm)}.kpi.nt .kpi-val{color:var(--p1)}
-.kpi-sub{font-size:9px;color:var(--dm);margin-top:4px}
+.kpi-sub{font-size:9px;color:var(--dm);margin-top:3px}
 .ev{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;margin-top:5px;padding:1px 7px;border-radius:20px}
 .ev.up{background:rgba(93,232,180,.15);color:var(--up)}.ev.dn{background:rgba(255,107,107,.12);color:var(--dn)}.ev.fl{background:rgba(122,116,144,.1);color:var(--dm)}
 
 /* GRIDS */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.g64{display:grid;grid-template-columns:6fr 4fr;gap:12px;margin-bottom:12px}
-.fw{margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.g64{display:grid;grid-template-columns:6fr 4fr;gap:8px;margin-bottom:8px}
+.fw{margin-bottom:8px}
 
 /* CARD */
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:18px}
-.ct{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.ct{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .bge{font-size:8px;padding:2px 8px;border-radius:20px;font-weight:700}
 .bsi{background:rgba(255,124,92,.12);color:var(--si)}.bso{background:rgba(245,200,66,.10);color:var(--so)}.bgm{background:rgba(93,232,180,.10);color:var(--gm)}.bnt{background:rgba(167,139,250,.10);color:var(--nt)}.bmh{background:linear-gradient(135deg,rgba(228,100,247,.1),rgba(254,168,217,.1));color:var(--p2)}
 
@@ -140,7 +140,7 @@ canvas{width:100%!important}
 .dli{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--dm)}
 .dld{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-footer{background:var(--sf);border-top:1px solid var(--bd);padding:10px 32px;display:flex;justify-content:space-between;color:var(--dm);font-size:9px}
+footer{background:var(--sf);border-top:1px solid var(--bd);padding:8px 24px;display:flex;justify-content:space-between;color:var(--dm);font-size:9px}
 
 /* === Pastel pink overrides === */
 .kpi{box-shadow:var(--shadow)}
@@ -217,19 +217,19 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
 .skuex-binner.so{background:linear-gradient(90deg,var(--so),#E89B45)}
 
 /* SKU breakdown rows - clearer lower panels */
-.skuex-row-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;margin-bottom:12px;box-shadow:var(--shadow)}
-.skuex-row-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:10px}
-.skuex-row-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--tx)}
-.skuex-row-sub{font-size:11px;color:var(--dm);margin-top:2px}
-.skuex-bar-item{display:grid;grid-template-columns:200px 1fr auto auto;gap:14px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(240,232,224,.5)}
+.skuex-row-card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow)}
+.skuex-row-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.skuex-row-title{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--tx);text-transform:uppercase;letter-spacing:.05em}
+.skuex-row-sub{font-size:10px;color:var(--dm);margin-top:1px}
+.skuex-bar-item{display:grid;grid-template-columns:140px 1fr 70px 50px 45px;gap:10px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(240,232,224,.4);font-size:11px}
 .skuex-bar-item:last-child{border:none}
-.skuex-bar-item:hover{background:rgba(255,123,171,.03);border-radius:6px;margin:0 -8px;padding-left:8px;padding-right:8px}
-.skuex-bar-name{font-size:12px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.skuex-bar-track{height:8px;background:#F4ECDC;border-radius:100px;overflow:hidden;position:relative}
+.skuex-bar-item:hover{background:rgba(255,123,171,.04)}
+.skuex-bar-name{font-size:11px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skuex-bar-track{height:4px;background:#F4ECDC;border-radius:100px;overflow:hidden;position:relative}
 .skuex-bar-fill{height:100%;border-radius:100px;transition:width .3s}
-.skuex-bar-val{text-align:right;font-size:13px;font-weight:700;color:var(--tx);font-variant-numeric:tabular-nums;min-width:80px}
-.skuex-bar-pct{font-size:11px;color:var(--dm);min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
-.skuex-bar-gm{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;min-width:55px;justify-content:center}
+.skuex-bar-val{text-align:right;font-size:11px;font-weight:700;color:var(--tx);font-variant-numeric:tabular-nums;white-space:nowrap}
+.skuex-bar-qty{text-align:right;font-size:10px;color:var(--dm);font-variant-numeric:tabular-nums}
+.skuex-bar-gm{display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px}
 .skuex-bar-gm.high{background:rgba(127,207,177,.25);color:#2A8257}
 .skuex-bar-gm.mid{background:rgba(240,179,102,.25);color:#A07239}
 .skuex-bar-gm.low{background:rgba(229,115,115,.25);color:#A44A4A}
@@ -238,9 +238,9 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
   .skuex-bar-item{grid-template-columns:140px 1fr auto;gap:8px}
   .skuex-bar-gm{display:none}
 }
-.skuex-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:var(--dm);margin-top:8px;padding-top:10px;border-top:1px dashed var(--bd)}
-.skuex-legend span{display:inline-flex;align-items:center;gap:5px}
-.skuex-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}
+.skuex-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:var(--dm);margin-top:6px;padding-top:6px;border-top:1px dashed var(--bd)}
+.skuex-legend span{display:inline-flex;align-items:center;gap:4px}
+.skuex-legend i{display:inline-block;width:8px;height:8px;border-radius:50%}
 
 </style>
 </head>
@@ -307,11 +307,11 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
           <button class="sb" onclick="siCh('B2B',this)">B2B</button>
         </div>
       </div>
-      <canvas id="siChChart" height="148"></canvas>
+      <canvas id="siChChart" height="103"></canvas>
     </div>
     <div class="g2">
       <div class="card"><div class="ct">Partenaires Wholesale <span class="bge bgm">GM1% · période</span></div><table class="tbl"><thead><tr><th>#</th><th>Partenaire</th><th class="r">SI €</th><th class="r">Part</th><th class="r">GM1%</th></tr></thead><tbody id="siPT"></tbody></table></div>
-      <div class="card"><div class="ct">SI Wholesale par catégorie — période</div><canvas id="siCatDonut" height="215"></canvas></div>
+      <div class="card"><div class="ct">SI Wholesale par catégorie — période</div><canvas id="siCatDonut" height="150"></canvas></div>
     </div>
   </div>
   <!-- YTD VIEW -->
@@ -320,31 +320,31 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
     <div class="g2">
       <div class="card">
         <div class="ct">CA Sell-in — YTD vs N-1 · tous canaux <span class="bge bsi">mensuel</span></div>
-        <canvas id="ytdBarChart" height="210"></canvas>
+        <canvas id="ytdBarChart" height="147"></canvas>
       </div>
       <div class="card">
         <div class="ct">Cumul YTD vs N-1 <span class="bge bsi">courbe cumulative</span></div>
-        <canvas id="ytdCumChart" height="210"></canvas>
+        <canvas id="ytdCumChart" height="147"></canvas>
       </div>
     </div>
     <div class="card fw">
       <div class="ct">Détail par canal — YTD vs N-1 <span class="bge bsi">+ évolution %</span></div>
-      <canvas id="ytdChannelChart" height="145"></canvas>
+      <canvas id="ytdChannelChart" height="101"></canvas>
     </div>
   </div>
 
   <div id="sv-cat-view" style="display:none">
-    <div class="card fw"><div class="ct">SI mensuel par catégorie — tous canaux <span class="bge bsi">vs N-1</span></div><canvas id="siCatChart" height="165"></canvas></div>
+    <div class="card fw"><div class="ct">SI mensuel par catégorie — tous canaux <span class="bge bsi">vs N-1</span></div><canvas id="siCatChart" height="115"></canvas></div>
     <div class="g2">
-      <div class="card"><div class="ct">Répartition catégories — période</div><canvas id="siCatDonut2" height="225"></canvas></div>
-      <div class="card"><div class="ct">GM1% par catégorie</div><canvas id="siCatGM" height="225"></canvas></div>
+      <div class="card"><div class="ct">Répartition catégories — période</div><canvas id="siCatDonut2" height="157"></canvas></div>
+      <div class="card"><div class="ct">GM1% par catégorie</div><canvas id="siCatGM" height="157"></canvas></div>
     </div>
   </div>
   <div id="sv-wscat-view" style="display:none">
-    <div class="card fw"><div class="ct">SI Wholesale mensuel par catégorie <span class="bge bsi">vs N-1</span></div><canvas id="siWsCatChart" height="165"></canvas></div>
+    <div class="card fw"><div class="ct">SI Wholesale mensuel par catégorie <span class="bge bsi">vs N-1</span></div><canvas id="siWsCatChart" height="115"></canvas></div>
     <div class="g2">
-      <div class="card"><div class="ct">Répartition Wholesale — période</div><canvas id="siWsCatDonut" height="225"></canvas></div>
-      <div class="card"><div class="ct">GM1% Wholesale par catégorie</div><canvas id="siWsCatGM" height="225"></canvas></div>
+      <div class="card"><div class="ct">Répartition Wholesale — période</div><canvas id="siWsCatDonut" height="157"></canvas></div>
+      <div class="card"><div class="ct">GM1% Wholesale par catégorie</div><canvas id="siWsCatGM" height="157"></canvas></div>
     </div>
   </div>
   <div id="sv-client-view" style="display:none">
@@ -385,8 +385,8 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
         </div>
         <div id="ciKPIs" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
         <div class="g2">
-          <div class="card"><div class="ct">CA mensuel <span class="bge bsi">vs N-1</span></div><canvas id="ciSalesChart" height="155"></canvas></div>
-          <div class="card"><div class="ct">Par catégorie — période</div><canvas id="ciCatChart" height="155"></canvas></div>
+          <div class="card"><div class="ct">CA mensuel <span class="bge bsi">vs N-1</span></div><canvas id="ciSalesChart" height="108"></canvas></div>
+          <div class="card"><div class="ct">Par catégorie — période</div><canvas id="ciCatChart" height="108"></canvas></div>
         </div>
       </div>
     </div>
@@ -408,11 +408,11 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
         <button class="sb" onclick="soRet('MARIONNAUD',this)">Marionnaud</button>
       </div>
     </div>
-    <canvas id="soRetChart" height="148"></canvas>
+    <canvas id="soRetChart" height="103"></canvas>
   </div>
   <div class="g2">
     <div class="card"><div class="ct">SO par enseigne <span class="bge bmh">vs N-1</span></div><table class="tbl"><thead><tr><th></th><th>Enseigne</th><th class="r">SO €</th><th class="r">vs N-1</th><th>Part</th></tr></thead><tbody id="soRT"></tbody></table></div>
-    <div class="card"><div class="ct">SO par catégorie — période</div><canvas id="soCatChart" height="215"></canvas></div>
+    <div class="card"><div class="ct">SO par catégorie — période</div><canvas id="soCatChart" height="150"></canvas></div>
   </div>
 </div>
 
@@ -429,7 +429,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
         <button class="sb" onclick="gmCh('B2B',this)">B2B</button>
       </div>
     </div>
-    <canvas id="gmChart" height="148"></canvas>
+    <canvas id="gmChart" height="103"></canvas>
     <div class="dl">
       <div class="dli"><div class="dld" style="background:var(--gm)"></div>GM1 € (barres)</div>
       <div class="dli"><div class="dld" style="background:var(--si)"></div>CA SI (fond)</div>
@@ -438,15 +438,15 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
   </div>
   <div class="g2">
     <div class="card"><div class="ct">GM1 par partenaire Wholesale <span class="bge bgm">période</span></div><table class="tbl"><thead><tr><th>#</th><th>Partenaire</th><th class="r">CA SI</th><th class="r">GM1 €</th><th class="r">GM1%</th></tr></thead><tbody id="gmPT"></tbody></table></div>
-    <div class="card"><div class="ct">GM1% par canal</div><canvas id="gmChChart" height="215"></canvas></div>
+    <div class="card"><div class="ct">GM1% par canal</div><canvas id="gmChChart" height="150"></canvas></div>
   </div>
-  <div class="card fw"><div class="ct">GM1% par SKU Wholesale — Top 15</div><canvas id="gmSkuChart" height="125"></canvas></div>
+  <div class="card fw"><div class="ct">GM1% par SKU Wholesale — Top 15</div><canvas id="gmSkuChart" height="87"></canvas></div>
 </div>
 
 <!-- TOP SKUs -->
 <div class="pg" id="pg-sku">
   <div class="kpis" id="ksku"></div>
-  <div class="card fw"><div class="ct">SI Wholesale · SO · comparaison période</div><canvas id="skuCmp" height="120"></canvas></div>
+  <div class="card fw"><div class="ct">SI Wholesale · SO · comparaison période</div><canvas id="skuCmp" height="84"></canvas></div>
   <div class="g2">
     <div class="card"><div class="ct">Top SKUs — SI Wholesale <span class="bge bsi">GM1%</span></div><table class="tbl"><thead><tr><th>#</th><th>SKU</th><th class="r">SI €</th><th class="r">GM1%</th></tr></thead><tbody id="skuSI"></tbody></table></div>
     <div class="card"><div class="ct">Top SKUs — Sell-out <span class="bge bso">SO/SI ratio</span></div><table class="tbl"><thead><tr><th>#</th><th>SKU</th><th class="r">SO €</th><th class="r">SO/SI</th></tr></thead><tbody id="skuSO"></tbody></table></div>
@@ -462,8 +462,8 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
     <div id="ecoBars"></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="ct">SI vs SO mensuel <span class="bge bnt">croisé · vs N-1</span></div><canvas id="ecoChart" height="210"></canvas></div>
-    <div class="card"><div class="ct">GM1 Wholesale mensuel <span class="bge bgm">vs N-1</span></div><canvas id="ecoGMChart" height="210"></canvas></div>
+    <div class="card"><div class="ct">SI vs SO mensuel <span class="bge bnt">croisé · vs N-1</span></div><canvas id="ecoChart" height="147"></canvas></div>
+    <div class="card"><div class="ct">GM1 Wholesale mensuel <span class="bge bgm">vs N-1</span></div><canvas id="ecoGMChart" height="147"></canvas></div>
   </div>
 </div>
 
@@ -482,10 +482,10 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
     </div>
   </div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="swKPIs"></div>
-  <div class="card fw"><div class="ct">Ventes hebdomadaires (€) <span class="bge bmh">vs N-1 pointillée</span></div><canvas id="swSales" height="155"></canvas></div>
+  <div class="card fw"><div class="ct">Ventes hebdomadaires (€) <span class="bge bmh">vs N-1 pointillée</span></div><canvas id="swSales" height="108"></canvas></div>
   <div class="g2">
-    <div class="card"><div class="ct">Quantités vendues / semaine <span class="bge bmh">vs N-1</span></div><canvas id="swQty" height="200"></canvas></div>
-    <div class="card"><div class="ct">Panier moyen (€/unité)</div><canvas id="swPanier" height="200"></canvas></div>
+    <div class="card"><div class="ct">Quantités vendues / semaine <span class="bge bmh">vs N-1</span></div><canvas id="swQty" height="140"></canvas></div>
+    <div class="card"><div class="ct">Panier moyen (€/unité)</div><canvas id="swPanier" height="140"></canvas></div>
   </div>
 
   <!-- SÉPARATION -->
@@ -503,7 +503,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
           <button class="sb" onclick="setSepSkuView('table',this)">Tableau</button>
         </div>
       </div>
-      <div id="sepSkuView-chart"><canvas id="sepSkuChart" height="240"></canvas></div>
+      <div id="sepSkuView-chart"><canvas id="sepSkuChart" height="168"></canvas></div>
       <div id="sepSkuView-table" style="display:none">
         <table class="tbl">
           <thead><tr><th>#</th><th>SKU</th><th class="r">SO €</th><th class="r">Unités</th><th>Part</th></tr></thead>
@@ -513,18 +513,18 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
     </div>
     <div class="card">
       <div class="ct">Répartition par catégorie <span class="bge bso">période sélectionnée</span></div>
-      <canvas id="sepCatDonut" height="240"></canvas>
+      <canvas id="sepCatDonut" height="168"></canvas>
     </div>
   </div>
 
   <div class="card fw" style="margin-bottom:12px">
     <div class="ct">SO Sephora mensuel par catégorie <span class="bge bso">empilé · période</span></div>
-    <canvas id="sepCatMonthChart" height="145"></canvas>
+    <canvas id="sepCatMonthChart" height="101"></canvas>
   </div>
 
   <div class="card fw">
     <div class="ct">Top 5 SKUs — évolution mensuelle SO €</div>
-    <canvas id="sepSkuMonthChart" height="145"></canvas>
+    <canvas id="sepSkuMonthChart" height="101"></canvas>
   </div>
 
 </div>
@@ -541,7 +541,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
       </div>
     </div>
     <div id="sephoKPIs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px"></div>
-    <canvas id="sephoChart" height="120"></canvas>
+    <canvas id="sephoChart" height="84"></canvas>
   </div>
 
   <!-- FRANCE vs RESTE DU MONDE -->
@@ -563,11 +563,11 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
     <div class="g2">
       <div class="card" style="padding:14px">
         <div class="ct">Évolution FR vs International par année</div>
-        <canvas id="frRestYearChart" height="210"></canvas>
+        <canvas id="frRestYearChart" height="147"></canvas>
       </div>
       <div class="card" style="padding:14px">
         <div class="ct">Part France — évolution mensuelle</div>
-        <canvas id="frPctChart" height="210"></canvas>
+        <canvas id="frPctChart" height="147"></canvas>
       </div>
     </div>
   </div>
@@ -596,10 +596,10 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
       </table>
     </div>
     <div id="paysView-bars" style="display:none">
-      <canvas id="paysBarsChart" height="180"></canvas>
+      <canvas id="paysBarsChart" height="125"></canvas>
     </div>
     <div id="paysView-monthly" style="display:none">
-      <canvas id="paysMonthlyChart" height="180"></canvas>
+      <canvas id="paysMonthlyChart" height="125"></canvas>
     </div>
   </div>
 
@@ -628,11 +628,11 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
   <div class="g2">
     <div class="card">
       <div class="ct">CA D2C mensuel <span class="bge" style="background:rgba(100,181,246,.12);color:#64b5f6">vs N-1 pointillée</span></div>
-      <canvas id="d2cTrendChart" height="210"></canvas>
+      <canvas id="d2cTrendChart" height="147"></canvas>
     </div>
     <div class="card">
       <div class="ct">GM1% mensuel <span class="bge" style="background:rgba(100,181,246,.12);color:#64b5f6">évolution marge</span></div>
-      <canvas id="d2cGMChart" height="210"></canvas>
+      <canvas id="d2cGMChart" height="147"></canvas>
     </div>
   </div>
 
@@ -641,7 +641,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
     <div class="ct">Top SKUs D2C — CA · GM1% · Unités <span class="bge" style="background:rgba(100,181,246,.12);color:#64b5f6">vert ≥85% · jaune ≥70% · rouge &lt;70%</span></div>
     <div class="g2" style="margin-bottom:0">
       <div>
-        <canvas id="d2cSkuChart" height="200"></canvas>
+        <canvas id="d2cSkuChart" height="140"></canvas>
       </div>
       <div>
         <table class="tbl" id="d2cSkuTable">
@@ -656,7 +656,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
   <div class="g2">
     <div class="card">
       <div class="ct">Répartition par catégorie — période</div>
-      <canvas id="d2cCatChart" height="225"></canvas>
+      <canvas id="d2cCatChart" height="157"></canvas>
     </div>
     <div class="card">
       <div class="ct">Top pays D2C — période <span class="bge" style="background:rgba(100,181,246,.12);color:#64b5f6">France vs International</span></div>
@@ -670,7 +670,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
   <!-- Évolution mensuelle par catégorie -->
   <div class="card fw">
     <div class="ct">CA D2C mensuel par catégorie <span class="bge" style="background:rgba(100,181,246,.12);color:#64b5f6">empilé</span></div>
-    <canvas id="d2cCatMonthChart" height="145"></canvas>
+    <canvas id="d2cCatMonthChart" height="101"></canvas>
   </div>
 </div>
 
@@ -726,12 +726,12 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
           <button class="sb" onclick="skuexSetMetric('gm',this)">GM1 €</button>
         </div>
       </div>
-      <canvas id="skuex-trend" height="125"></canvas>
+      <canvas id="skuex-trend" height="80"></canvas>
     </div>
 
     <div class="card fw">
       <div class="ct">Évolution annuelle <span class="bge bnt">tout historique 2020 → 2026</span></div>
-      <canvas id="skuex-year" height="100"></canvas>
+      <canvas id="skuex-year" height="70"></canvas>
     </div>
 
     <!-- Channels -->
@@ -2239,11 +2239,11 @@ function skuexRenderBars(elId, dict, kind, limit){
                   : `linear-gradient(90deg,${CC.si},${CC.p2})`;
   el.innerHTML = filtered.map(x=>{
     const width = Math.abs(x.r)/maxR*100;
-    const share = total>0?Math.abs(x.r)/total*100:0;
     return `<div class="skuex-bar-item">
       <div class="skuex-bar-name" title="${x.name}">${x.name}</div>
       <div class="skuex-bar-track"><div class="skuex-bar-fill" style="width:${width.toFixed(0)}%;background:${fillColor}"></div></div>
-      <div class="skuex-bar-val">${fmtK(x.r)}€<div style="font-size:10px;font-weight:500;color:var(--dm)">${fmt(x.q)} u.</div></div>
+      <div class="skuex-bar-val">${fmtK(x.r)}€</div>
+      <div class="skuex-bar-qty">${fmt(x.q)}u</div>
       ${skuexGmBadge(x.gp)}
     </div>`;
   }).join('');
@@ -2264,11 +2264,13 @@ function skuexRenderSoBars(elId, dict, limit){
   }
   el.innerHTML = filtered.map(x=>{
     const width = Math.abs(x.r)/maxR*100;
+    const share = total>0?Math.abs(x.r)/total*100:0;
     return `<div class="skuex-bar-item">
       <div class="skuex-bar-name" title="${x.name}">${x.name}</div>
       <div class="skuex-bar-track"><div class="skuex-bar-fill" style="width:${width.toFixed(0)}%;background:linear-gradient(90deg,${CC.so},${CC.p2})"></div></div>
-      <div class="skuex-bar-val">${fmtK(x.r)}€<div style="font-size:10px;font-weight:500;color:var(--dm)">${fmt(x.q)} u.</div></div>
-      <div style="font-size:11px;color:var(--dm);text-align:right;min-width:40px">${(total>0?Math.abs(x.r)/total*100:0).toFixed(0)}%</div>
+      <div class="skuex-bar-val">${fmtK(x.r)}€</div>
+      <div class="skuex-bar-qty">${fmt(x.q)}u</div>
+      <div style="font-size:10px;color:var(--dm);text-align:right;font-weight:600">${share.toFixed(0)}%</div>
     </div>`;
   }).join('');
 }
