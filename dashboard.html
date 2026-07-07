@@ -8412,7 +8412,11 @@ function buildCSC(){
   rows.forEach(s => {
     if (!catAgg[s.cat]) catAgg[s.cat] = {eur:0, eurLY:0};
     catAgg[s.cat].eur += s.eur;
-    catAgg[s.cat].eurLY += s.eurLY;
+  });
+  // CA N-1 par catégorie recalculé sur TOUS les SKU (y compris arrêtés) — même correctif
+  // que pour le CA N-1 total, pour ne pas sous-évaluer la base N-1 (cf 2026-07-07).
+  allRows.forEach(s => {
+    if (catAgg[s.cat]) catAgg[s.cat].eurLY += s.eurLY;
   });
   const catEntries = Object.entries(catAgg).sort((a,b) => b[1].eur - a[1].eur);
   const ce = document.getElementById('cscCatDonut');
