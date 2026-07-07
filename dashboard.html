@@ -8366,7 +8366,7 @@ function buildCSC(){
   const data = (D.cl_sku || {})[curCSC] || {};
   const months = ms();
   const monthsLY = mp(); // vrais mois N-1 (même calendrier, année-1) — cf feedback-csc-n1-realdata
-  const rows = Object.entries(data).map(([ref, info]) => {
+  const allRows = Object.entries(data).map(([ref, info]) => {
     let qty=0,eur=0,qtyLY=0,eurLY=0;
     months.forEach((m,i) => {
       const r = info.monthly[m];
@@ -8379,9 +8379,13 @@ function buildCSC(){
       if (rLY) { qtyLY += rLY[0]; eurLY += rLY[1]; }
     });
     return {ref, cat: info.cat||'—', pcat: info.pcat||'', first: info.first, qty, eur, qtyLY, eurLY};
-  }).filter(s => s.eur > 0).sort((a,b) => b.eur - a.eur);
+  });
+  const rows = allRows.filter(s => s.eur > 0).sort((a,b) => b.eur - a.eur);
   const totalCA = rows.reduce((a,s)=>a+s.eur,0);
-  const totalCALY = rows.reduce((a,s)=>a+s.eurLY,0);
+  // CA N-1 total calculé sur TOUS les SKU (y compris ceux arrêtés, eur=0 période courante) —
+  // sinon le dénominateur de la croissance est sous-évalué et gonfle le % affiché
+  // (cf incident Sephora 71.1% affiché vs 70.0% réel, 2026-07-07).
+  const totalCALY = allRows.reduce((a,s)=>a+s.eurLY,0);
   const totalQty = rows.reduce((a,s)=>a+s.qty,0);
   const ev = totalCALY > 0 ? ((totalCA-totalCALY)/totalCALY*100) : null;
 
