@@ -1103,15 +1103,6 @@ async function askcSend(){
           <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dm);pointer-events:none">🔍</span>
           <input class="ci-srch" id="ciInput" placeholder="Rechercher (ex: Sephora, Mecca, Cabaia, Ross...)" oninput="ciSearch(this.value)">
         </div>
-        <!-- YEAR FILTER -->
-        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm)">Année</span>
-          <button class="sb on" id="ciY-all"  onclick="setCIYear('all',this)">Tout</button>
-          <button class="sb" id="ciY-2023" onclick="setCIYear('2023',this)">2023</button>
-          <button class="sb" id="ciY-2024" onclick="setCIYear('2024',this)">2024</button>
-          <button class="sb" id="ciY-2025" onclick="setCIYear('2025',this)">2025</button>
-          <button class="sb" id="ciY-2026" onclick="setCIYear('2026',this)">2026</button>
-        </div>
         <!-- CHANNEL FILTER -->
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
           <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dm)">Canal</span>
@@ -3057,7 +3048,7 @@ function buildSI(){
   if(curSIView==='canal'){buildSICanal();buildSIPartnerTable();buildSIWsDonut();}
   else if(curSIView==='cat')buildCatView(false);
   else if(curSIView==='wscat')buildCatView(true);
-  else if(curSIView==='client')buildCITop();
+  else if(curSIView==='client'){ if(ciCurrentClient && document.getElementById('ciDetail')?.style.display !== 'none') ciSelect(ciCurrentClient); else buildCITop(); }
   else if(curSIView==='monthly')mdBuild();
   else if(curSIView==='ytd')buildYTD();
 }
@@ -3140,7 +3131,6 @@ function buildCatView(ws){
 
 // ===== CLIENT SEARCH =====
 // ===== CLIENT SEARCH — enhanced =====
-let ciYear = 'all';   // 'all' | '2023' | '2024' | '2025' | '2026'
 let ciChan = 'all';
 let ciCurrentClient = null; // currently displayed client name   // 'all' | 'Wholesale' | 'B2B' | 'D2C'
 
@@ -3162,31 +3152,11 @@ function toggleExclHydro(cb) {
   if (typeof buildEco === 'function' && D.cl) buildEco();
 }
 
-// Compute months to use for a given year filter (ignoring CUR period — year is absolute)
-function ciMonths(year) {
-  if (year === 'all') return D.months;
-  return D.months.filter(m => m.startsWith(year));
-}
-// Same but N-1
-function ciMonthsPrev(year) {
-  if (year === 'all') return D.months.map(m => { const [y,mo]=m.split('-'); return `${+y-1}-${mo}`; });
-  const prevY = String(+year - 1);
-  // Aligner N-1 sur les MÊMES mois que l'année courante (comparaison YTD à période égale).
-  // Sinon on comparait p.ex. Jan–Mai 2026 (5 mois) contre toute l'année 2025 (12 mois).
-  return ciMonths(year).map(m => prevY + '-' + m.split('-')[1]);
-}
+// Mois à utiliser dans la Recherche client — alignés sur le sélecteur de période global (CUR.f → CUR.t).
+// (avant : filtre "Année" dédié et redondant avec la barre PÉRIODE du haut, supprimé le 8 juillet 2026)
+function ciMonths() { return ms(); }
+function ciMonthsPrev() { return mp(); }
 
-function setCIYear(y, btn) {
-  ciYear = y;
-  document.querySelectorAll('[id^="ciY-"]').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  // If a client detail is shown, refresh it with the new year
-  if (ciCurrentClient && document.getElementById('ciDetail').style.display !== 'none') {
-    ciSelect(ciCurrentClient);
-  } else {
-    buildCITop();
-  }
-}
 let mhcYear = 'all';
 function setMHCYear(y, btn){
   mhcYear = y;
@@ -3224,7 +3194,7 @@ function ciGM(name, months) {
 function buildCITop() {
   const top = document.getElementById('ciTop'); top.innerHTML = '';
   // Compute sales for all clients with current filters
-  const M = ciMonths(ciYear), MP = ciMonthsPrev(ciYear);
+  const M = ciMonths(), MP = ciMonthsPrev();
   const ranked = D.cl
     .filter(c => ciChan === 'all' || c.ch === ciChan)
     .map(c => {
@@ -3238,7 +3208,7 @@ function buildCITop() {
     .sort((a, b) => b.s - a.s)
     .slice(0, 30);
 
-  const yearLbl = ciYear === 'all' ? 'toutes périodes' : ciYear;
+  const yearLbl = mdPeriodLabel();
   const chanLbl = ciChan === 'all' ? '' : ` · ${ciChan}`;
   top.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -3270,7 +3240,7 @@ function ciSearch(val) {
     return;
   }
   const lower = val.toLowerCase();
-  const M = ciMonths(ciYear);
+  const M = ciMonths();
   const matches = D.cl
     .filter(c => c.n.toLowerCase().includes(lower) && (ciChan === 'all' || c.ch === ciChan))
     .map(c => ({ ...c, s: M.reduce((a, m) => a + (D.cm[c.n]?.s?.[m] || 0), 0) }))
@@ -3295,7 +3265,7 @@ function ciSelect(name) {
   document.getElementById('ciTop').style.display = 'none';
   document.getElementById('ciDetail').style.display = '';
   const cd = D.cm[name]; if (!cd) return;
-  const M = ciMonths(ciYear), MP = ciMonthsPrev(ciYear);
+  const M = ciMonths(), MP = ciMonthsPrev();
   const L = M.map(m => { const [y, mo] = m.split('-'); return MN[+mo - 1] + (M.length > 14 ? "'" + y.slice(2) : ''); });
 
   const exCY = EXCL_HYDRO500 ? hydroExclAmt(name, M) : { qty: 0, eur: 0, gm: 0 };
@@ -3305,7 +3275,7 @@ function ciSelect(name) {
   const gmCY  = M.reduce((a, m) => a + (cd.gm?.[m] || 0), 0) - exCY.gm;
   const gmPct = totCY > 0 ? gmCY / totCY * 100 : 0;
   const meta  = D.cl.find(c => c.n === name) || {};
-  const yearLbl = ciYear === 'all' ? '2023–2026' : ciYear;
+  const yearLbl = mdPeriodLabel();
 
   // --- Part du CA Sell-In + rang sur la période ---
   const grandTot = D.cl.reduce((a, c) => a + M.reduce((x, m) => x + (D.cm[c.n]?.s?.[m] || 0), 0), 0);
@@ -4241,8 +4211,8 @@ function expSellInPartner(){
 function expCiSKU(){
   if(!ciCurrentClient){ alert('Sélectionne un client d\'abord'); return; }
   const data = (D.cl_sku_in || {})[ciCurrentClient] || {};
-  const M = ciMonths(ciYear), MP = ciMonthsPrev(ciYear);
-  const rows = Object.entries(data).map(([ref, info]) => {
+  const M = ciMonths(), MP = ciMonthsPrev();
+  const rows = Object.entries(data).filter(([ref]) => !(EXCL_HYDRO500 && ref === EXCL_SKU)).map(([ref, info]) => {
     let qty=0, eur=0, gm=0, eurPY=0;
     M.forEach(m => { const r = info.monthly[m]; if(r){ qty+=r[0]; eur+=r[1]; gm+=r[2]; }});
     MP.forEach(m => { const r = info.monthly[m]; if(r) eurPY += r[1]; });
@@ -4263,7 +4233,7 @@ function expCiSKU(){
     'CA N-1 €': Math.round(s.eurPY),
     'Evolution %': s.eurPY > 0 ? Math.round((s.eur - s.eurPY) / s.eurPY * 100) : null,
   }));
-  expXLSX(`sell_in_${ciCurrentClient.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30)}_${ciYear}.xlsx`, [
+  expXLSX(`sell_in_${ciCurrentClient.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30)}_${CUR.f}_${CUR.t}.xlsx`, [
     {name: 'Top SKUs', rows: out}
   ]);
 }
@@ -9255,7 +9225,7 @@ function expMdClientDrill(){
 
 function ciBuildSKU(name){
   const data = (D.cl_sku_in || {})[name] || {};
-  const M = ciMonths(ciYear), MP = ciMonthsPrev(ciYear);
+  const M = ciMonths(), MP = ciMonthsPrev();
   const rows = Object.entries(data).filter(([ref]) => !(EXCL_HYDRO500 && ref === EXCL_SKU)).map(([ref, info]) => {
     let qty=0, eur=0, gm=0, eurPY=0;
     M.forEach(m => { const r = info.monthly[m]; if (r) { qty += r[0]; eur += r[1]; gm += r[2]; } });
