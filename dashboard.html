@@ -1329,8 +1329,13 @@ async function askcSend(){
   <div class="src-bar"><span class="src-i">📂</span><span class="src-lbl">Source</span><code>database TRF.xlsx</code><span class="src-sep">+</span><code>Reporting Sell Out VF.xlsx</code><span class="src-sep">·</span><span class="src-tag">Ratio SO / SI Wholesale par partenaire</span><span class="src-sep">·</span><span class="src-tag">&gt;100% = stocks retailer en train de vider</span></div>
   <div class="kpis" id="keco"></div>
   <div class="card fw" style="margin-bottom:12px">
-    <div class="ct">Taux d'écoulement SO / SI Wholesale — par partenaire · période</div>
-    <p style="font-size:10px;color:var(--dm);margin-bottom:14px">&gt;100% = les ventes consommateur dépassent les commandes retailer</p>
+    <div class="ct" style="display:flex;align-items:center;flex-wrap:wrap">Taux d'écoulement SO / SI Wholesale — par partenaire · période
+      <label style="display:inline-flex;align-items:center;gap:6px;margin-left:12px;font-size:9.5px;font-weight:700;color:var(--dm);cursor:pointer;user-select:none">
+        <input type="checkbox" class="excl-hydro-cb" onchange="toggleExclHydro(this)" style="width:13px;height:13px;accent-color:var(--p1);cursor:pointer">
+        🚫 Exclure réf B2B Sephora MH-GEL-HYDRO-500
+      </label>
+    </div>
+    <p style="font-size:10px;color:var(--dm);margin-bottom:14px">&gt;100% = les ventes consommateur dépassent les commandes retailer · la case ci-dessus corrige la ligne Sephora (réf B2B quasi absente du Sell-Out, qui fausse son ratio)</p>
     <div id="ecoBars"></div>
   </div>
   <div class="card fw">
@@ -3139,6 +3144,24 @@ let ciYear = 'all';   // 'all' | '2023' | '2024' | '2025' | '2026'
 let ciChan = 'all';
 let ciCurrentClient = null; // currently displayed client name   // 'all' | 'Wholesale' | 'B2B' | 'D2C'
 
+// ===== EXCLUSION RÉF B2B SEPHORA (MH-GEL-HYDRO-500) =====
+// Réf vendue à Sephora en B2B (gros volumes, prix quasi nul) — quasi absente du Sell-Out déclaré.
+// Fausse le Sell-In (qté + €) et donc le sell-through Sephora. Toggle dynamique, off par défaut.
+const EXCL_SKU = 'MH-GEL-HYDRO-500';
+let EXCL_HYDRO500 = false;
+function hydroExclAmt(name, M) {
+  const info = (D.cl_sku_in || {})[name]?.[EXCL_SKU];
+  let qty = 0, eur = 0, gm = 0;
+  if (info) M.forEach(m => { const r = info.monthly[m]; if (r) { qty += r[0]; eur += r[1]; gm += (r[2] || 0); } });
+  return { qty, eur, gm };
+}
+function toggleExclHydro(cb) {
+  EXCL_HYDRO500 = !!cb.checked;
+  document.querySelectorAll('.excl-hydro-cb').forEach(el => { if (el !== cb) el.checked = EXCL_HYDRO500; });
+  if (ciCurrentClient) ciSelect(ciCurrentClient);
+  if (typeof buildEco === 'function' && D.cl) buildEco();
+}
+
 // Compute months to use for a given year filter (ignoring CUR period — year is absolute)
 function ciMonths(year) {
   if (year === 'all') return D.months;
@@ -3275,9 +3298,11 @@ function ciSelect(name) {
   const M = ciMonths(ciYear), MP = ciMonthsPrev(ciYear);
   const L = M.map(m => { const [y, mo] = m.split('-'); return MN[+mo - 1] + (M.length > 14 ? "'" + y.slice(2) : ''); });
 
-  const totCY = M.reduce((a, m) => a + (cd.s?.[m] || 0), 0);
-  const totPY = MP.reduce((a, m) => a + (cd.s?.[m] || 0), 0);
-  const gmCY  = M.reduce((a, m) => a + (cd.gm?.[m] || 0), 0);
+  const exCY = EXCL_HYDRO500 ? hydroExclAmt(name, M) : { qty: 0, eur: 0, gm: 0 };
+  const exPY = EXCL_HYDRO500 ? hydroExclAmt(name, MP) : { qty: 0, eur: 0, gm: 0 };
+  const totCY = M.reduce((a, m) => a + (cd.s?.[m] || 0), 0) - exCY.eur;
+  const totPY = MP.reduce((a, m) => a + (cd.s?.[m] || 0), 0) - exPY.eur;
+  const gmCY  = M.reduce((a, m) => a + (cd.gm?.[m] || 0), 0) - exCY.gm;
   const gmPct = totCY > 0 ? gmCY / totCY * 100 : 0;
   const meta  = D.cl.find(c => c.n === name) || {};
   const yearLbl = ciYear === 'all' ? '2023–2026' : ciYear;
@@ -3339,10 +3364,17 @@ function ciSelect(name) {
     const soEurPY = MP.reduce((a, m) => a + (D.so_ret[soRetMatch]?.[m] || 0), 0);
     const soQty = M.reduce((a, m) => a + ((D.so_qty || {})[soRetMatch]?.[m] || 0), 0);
     let siQty = 0; const sk = (D.cl_sku_in || {})[name] || {};
-    Object.values(sk).forEach(info => { M.forEach(m => { const r = info.monthly[m]; if (r) siQty += r[0]; }); });
+    Object.entries(sk).forEach(([ref, info]) => { if (EXCL_HYDRO500 && ref === EXCL_SKU) return; M.forEach(m => { const r = info.monthly[m]; if (r) siQty += r[0]; }); });
     const stUnits = siQty > 0 ? soQty / siQty * 100 : null;
+    const hasHydro = !!(D.cl_sku_in?.[name]?.[EXCL_SKU]);
+    const exclToggle = hasHydro
+      ? '<label style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;font-size:9.5px;font-weight:700;color:var(--dm);cursor:pointer;user-select:none">'
+        + '<input type="checkbox" class="excl-hydro-cb" ' + (EXCL_HYDRO500 ? 'checked' : '') + ' onchange="toggleExclHydro(this)" style="width:13px;height:13px;accent-color:var(--p1);cursor:pointer">'
+        + '🚫 Exclure réf B2B ' + EXCL_SKU + '</label>'
+      : '';
     soCard.style.display = '';
-    soCard.innerHTML = '<div class="ct">⚖️ Sell-In vs Sell-Out · ' + soRetMatch + ' <span class="bge bsi">' + yearLbl + '</span></div>'
+    soCard.innerHTML = '<div class="ct" style="display:flex;align-items:center;flex-wrap:wrap">⚖️ Sell-In vs Sell-Out · ' + soRetMatch + ' <span class="bge bsi">' + yearLbl + '</span>' + exclToggle + '</div>'
+      + (EXCL_HYDRO500 && hasHydro ? '<div style="font-size:9.5px;color:var(--dn);margin-bottom:6px">Réf B2B ' + EXCL_SKU + ' exclue du Sell-In ci-dessous (' + fmt(exCY.qty) + ' u. / ' + fmtK(exCY.eur) + '€ sur la période).</div>' : '')
       + '<div class="kpis" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">'
       + '<div class="kpi si"><div class="kpi-lbl">Sell-In (facturé)</div><div class="kpi-val">' + fmtK(totCY) + '€</div><div class="kpi-sub">' + fmt(siQty) + ' u.</div></div>'
       + '<div class="kpi so"><div class="kpi-lbl">Sell-Out (conso)</div><div class="kpi-val">' + fmtK(soEur) + '€</div>' + evolHTML(soEur, soEurPY) + '</div>'
@@ -3806,7 +3838,8 @@ function buildEco(){
   D.cl.forEach(c=>{
     const pt=c.pt||'';if(!pt||pt==='0'||pt==='nan'||pt==='')return;
     const cd=D.cm[c.n];if(!cd)return;
-    const s=M.reduce((a,m)=>a+(cd.s?.[m]||0),0);
+    let s=M.reduce((a,m)=>a+(cd.s?.[m]||0),0);
+    if(EXCL_HYDRO500) s -= hydroExclAmt(c.n, M).eur;
     if(!pm[pt])pm[pt]=0;pm[pt]+=s;
   });
   const soMap={Sephora:'SEPHORA',Nocibé:'NOCIBE',MECCA:'MECCA',Marionnaud:'MARIONNAUD',Monoprix:'MONOPRIX','Lagardere - Aelia':'LAGARDERE AELIA'};
@@ -9223,7 +9256,7 @@ function expMdClientDrill(){
 function ciBuildSKU(name){
   const data = (D.cl_sku_in || {})[name] || {};
   const M = ciMonths(ciYear), MP = ciMonthsPrev(ciYear);
-  const rows = Object.entries(data).map(([ref, info]) => {
+  const rows = Object.entries(data).filter(([ref]) => !(EXCL_HYDRO500 && ref === EXCL_SKU)).map(([ref, info]) => {
     let qty=0, eur=0, gm=0, eurPY=0;
     M.forEach(m => { const r = info.monthly[m]; if (r) { qty += r[0]; eur += r[1]; gm += r[2]; } });
     MP.forEach(m => { const r = info.monthly[m]; if (r) eurPY += r[1]; });
