@@ -8390,7 +8390,11 @@ function buildCSC(){
   // (cf incident Sephora 71.1% affiché vs 70.0% réel, 2026-07-07).
   const totalCALY = allRows.reduce((a,s)=>a+s.eurLY,0);
   const totalQty = rows.reduce((a,s)=>a+s.qty,0);
+  // Qté N-1 recalculée sur TOUS les SKU (même logique que totalCALY) pour ne pas
+  // sous-évaluer la base N-1 en cas de turnover catalogue.
+  const totalQtyLY = allRows.reduce((a,s)=>a+s.qtyLY,0);
   const ev = totalCALY > 0 ? ((totalCA-totalCALY)/totalCALY*100) : null;
+  const evQty = totalQtyLY > 0 ? ((totalQty-totalQtyLY)/totalQtyLY*100) : null;
 
   // Gestion devise : Mecca = AUD, autres = EUR
   const FX_AUD_EUR_CSC = 0.61;
@@ -8401,7 +8405,7 @@ function buildCSC(){
   const cscTitleAttr = isMeccaCSC ? 'title="'+fmtK(totalCA)+' AUD ≈ '+fmtK(totalCA*FX_AUD_EUR_CSC)+'€ (taux '+FX_AUD_EUR_CSC+')"' : '';
   document.getElementById('cscKPIs').innerHTML =
     '<div class="kpi so" '+cscTitleAttr+'><div class="kpi-lbl">CA '+curCSC+(isMeccaCSC?' 🇦🇺':'')+'</div><div class="kpi-val">'+fmtK(totalCA)+cscCurrSep+'</div>'+(isMeccaCSC?'<div class="kpi-sub">≈ '+fmtK(totalCA*FX_AUD_EUR_CSC)+'€</div>':'')+(ev!==null?'<div class="ev" style="color:'+(ev>0?'var(--up)':'var(--dn)')+';margin-top:4px">'+(ev>0?'↑':'↓')+' '+Math.abs(ev).toFixed(1)+'% vs N-1</div>':'')+'</div>'
-    + '<div class="kpi gm"><div class="kpi-lbl">Quantités</div><div class="kpi-val">'+fmt(totalQty)+'</div></div>'
+    + '<div class="kpi gm"><div class="kpi-lbl">Quantités</div><div class="kpi-val">'+fmt(totalQty)+'</div>'+(evQty!==null?'<div class="ev" style="color:'+(evQty>0?'var(--up)':'var(--dn)')+';margin-top:4px">'+(evQty>0?'↑':'↓')+' '+Math.abs(evQty).toFixed(1)+'% vs N-1</div>':'')+'</div>'
     + '<div class="kpi nt"><div class="kpi-lbl">SKUs actifs</div><div class="kpi-val">'+rows.length+'</div></div>';
 
   // Liste SKU complète + sélection multi
