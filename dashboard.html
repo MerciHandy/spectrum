@@ -1703,7 +1703,7 @@ async function askcSend(){
   <!-- ===== CARTE DES PAYS (poids YTD 2026 par défaut) ===== -->
   <div class="card fw" style="margin-bottom:14px">
     <div class="ct">🗺️ Pays par poids <span class="bge bso" id="swMapLbl">YTD 2026</span> <span id="swMapPeriod" style="margin-left:8px;font-size:10px;color:var(--dm);font-weight:600;text-transform:none;letter-spacing:0">—</span>
-      <span style="margin-left:auto;font-size:9px;color:var(--dm);text-transform:none;letter-spacing:0">Treemap visuel · taille = part du CA · suit le sélecteur de vue en haut de page</span>
+      <span style="margin-left:auto;font-size:9px;color:var(--dm);text-transform:none;letter-spacing:0">Treemap visuel · taille = part du CA · suit la barre PÉRIODE en haut de page</span>
     </div>
     <div id="swMap" style="display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(40px,auto);gap:6px;margin-top:8px"></div>
 
@@ -3861,10 +3861,7 @@ function swvSet(v, btn){
   document.querySelectorAll('[id^=swv-]').forEach(b => b.classList.remove('on'));
   if(btn) btn.classList.add('on');
   buildSWCurrent();
-  if(typeof buildSWMap === 'function') buildSWMap();
-  if(typeof buildSwHeatmap === 'function') buildSwHeatmap();
-  const dEl = document.getElementById('swCountryDetail');
-  if(window.swCurCountry && dEl && dEl.style.display !== 'none') swCountryDrill(window.swCurCountry);
+  // treemap / heatmap ne dépendent pas de ce sélecteur : elles suivent la barre PÉRIODE globale
 }
 
 // ===== BRIEFING SEMAINE — résumé exécutif live depuis D.sw_history =====
@@ -4582,24 +4579,21 @@ function swHmSet(kind, value, btn){
 }
 function buildSwHeatmap(){
   if(!D.sw_history) return;
-  // la période suit le sélecteur de vue en haut de page
-  swHmPeriod = (typeof curSWView === 'undefined') ? 'ytd'
-             : (curSWView === 'week' ? 'wk' : (curSWView === 'ytdp' ? 'ytd25' : 'ytd'));
+
   const el = document.getElementById('swHmTable');
   const legend = document.getElementById('swHmLegend');
   if(!el) return;
   const periods = swSortedPeriods();
   if(!periods.length){ el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--dm)">Pas encore de data Sephora hebdo</div>'; return; }
   // Sélection période
-  const includePeriods = (swHmPeriod==='ytd')   ? periods.filter(p=>p.startsWith('2026'))
-                       : (swHmPeriod==='ytd25') ? periods.filter(p=>p.startsWith('2025'))
-                       : [periods[periods.length-1]];
-  const hmCov = (swHmPeriod === 'wk' || typeof swCoverageLbl !== 'function') ? ''
-              : swCoverageLbl(swHmPeriod === 'ytd' ? 'ytd26' : 'ytd25');
-  const periodLbl = (swHmPeriod==='ytd')   ? 'YTD 2026 (cumul des semaines)'
-                  : (swHmPeriod==='ytd25') ? 'YTD 2025 · N-1 (cumul des semaines)'
-                  : 'Semaine S' + String(isoWeekOf(periods[periods.length-1])).padStart(2,'0')
-                    + ' · ' + swWeekRange(periods[periods.length-1], 'long');
+  const includePeriods = swGlobalPeriods();
+  if(!includePeriods.length){
+    if(legend) legend.innerHTML = '';
+    el.innerHTML = '<div style="padding:26px;text-align:center;color:var(--dm);font-size:11px">Aucune semaine Sephora sur cette période — les données hebdo démarrent en janvier 2025.</div>';
+    return;
+  }
+  const hmCov = swCoverageLbl(includePeriods);
+  const periodLbl = swGlobalTitle() + (includePeriods.length > 1 ? ' (cumul des semaines)' : '');
 
   // Agrégat : country → ref → CA
   const byCountryRef = {}; // country -> ref -> {s, q}
@@ -5025,54 +5019,59 @@ function swCmpRender(){
 }
 
 // ===== CARTE DES PAYS (treemap visuel) =====
-// La treemap pays suit le sélecteur de vue du haut de page (Semaine / YTD 2026 / YTD 2025)
-function swModeFromView(){
-  if(typeof curSWView === 'undefined') return 'ytd26';
-  return curSWView === 'week' ? 'last' : (curSWView === 'ytdp' ? 'ytd25' : 'ytd26');
+// Treemap + heatmap : la période vient de la barre PÉRIODE globale (CUR.f → CUR.t)
+function swGlobalPeriods(){
+  const ps = swSortedPeriods();
+  if(typeof CUR === 'undefined' || !CUR.f || !CUR.t) return ps;
+  // une semaine à cheval sur deux mois est rattachée au mois de son milieu (mercredi)
+  const monthOf = p => {
+    const [y,m,d] = p.split('-').map(Number);
+    const mid = new Date(y, m-1, d+3);
+    return mid.getFullYear() + '-' + String(mid.getMonth()+1).padStart(2,'0');
+  };
+  return ps.filter(p => { const m = monthOf(p); return m >= CUR.f && m <= CUR.t; });
+}
+function swGlobalTitle(){
+  if(typeof CUR === 'undefined' || !CUR.f) return '';
+  const lbl = m => MN[+m.slice(5,7)-1] + ' ' + m.slice(0,4);
+  return CUR.f === CUR.t ? lbl(CUR.f) : `${lbl(CUR.f)} → ${lbl(CUR.t)}`;
 }
 function swWeekEnd(p){
   const [y,m,d] = p.split('-').map(Number);
   const e = new Date(y, m-1, d); e.setDate(e.getDate()+6);
   return `${e.getDate()} ${SW_MONTHS_SHORT[e.getMonth()]} ${e.getFullYear()}`;
 }
-// Couverture réelle des données : jusqu'à quelle semaine on a des chiffres
-function swCoverageLbl(mode){
-  const periods = swSortedPeriods();
-  if(!periods.length) return '';
-  let ws;
-  if(mode === 'ytd26') ws = periods.filter(p=>p.startsWith('2026'));
-  else if(mode === 'ytd25') ws = periods.filter(p=>p.startsWith('2025'));
-  else ws = [periods[periods.length-1]];
-  if(!ws.length) return '';
+// Couverture réelle des données Sephora à l'intérieur de la période choisie
+function swCoverageLbl(ws){
+  const all = swSortedPeriods();
+  if(!ws || !ws.length) return 'aucune semaine Sephora sur cette période';
   const wk = p => 'S' + String(isoWeekOf(p)).padStart(2,'0');
   const last = ws[ws.length-1];
-  if(ws.length === 1) return `${wk(last)} · ${swWeekRange(last,'long')}`;
-  return `${ws.length} semaines · données jusqu'à ${wk(last)} (${swWeekEnd(last)})`;
+  // des semaines plus récentes existent mais tombent hors de la période choisie
+  // alerte seulement quand on croit être à jour (période allant jusqu'au dernier mois du dashboard)
+  const lastMonth = (typeof D !== 'undefined' && D.months) ? D.months[D.months.length-1] : null;
+  const atEnd = (typeof CUR !== 'undefined' && lastMonth && CUR.t === lastMonth);
+  const after = atEnd ? all.filter(p => p > last).length : 0;
+  const warn = after ? ` · ⚠️ ${after} semaine${after>1?'s':''} Sephora plus récente${after>1?'s':''} hors période` : '';
+  if(ws.length === 1) return `${wk(last)} · ${swWeekRange(last,'long')}${warn}`;
+  return `${ws.length} semaines · ${wk(ws[0])} → ${wk(last)} · données jusqu'au ${swWeekEnd(last)}${warn}`;
 }
-function swMapSet(mode, btn){ buildSWMap(); }   // conservé pour compat — la vue pilote désormais
+function swMapSet(mode, btn){ buildSWMap(); }   // conservé pour compat — la barre PÉRIODE pilote désormais
 function buildSWMap(){
-  swMapMode = swModeFromView();
-  const periods = swSortedPeriods();
+  const ws = swGlobalPeriods();
   let agg = {};  // {country: sales}
-  let lbl = '';
-  if(swMapMode === 'ytd26'){
-    periods.filter(p=>p.startsWith('2026')).forEach(p => {
-      (D.sw_history[p].by_country||[]).forEach(c => { agg[c.name] = (agg[c.name]||0) + c.s; });
-    });
-    lbl = 'YTD 2026';
-  } else if(swMapMode === 'ytd25'){
-    periods.filter(p=>p.startsWith('2025')).forEach(p => {
-      (D.sw_history[p].by_country||[]).forEach(c => { agg[c.name] = (agg[c.name]||0) + c.s; });
-    });
-    lbl = 'YTD 2025 (N-1)';
-  } else {
-    const last = periods[periods.length-1];
-    (D.sw_history[last].by_country||[]).forEach(c => { agg[c.name] = c.s; });
-    lbl = 'Semaine en cours';
-  }
-  document.getElementById('swMapLbl').textContent = lbl;
+  ws.forEach(p => {
+    ((D.sw_history[p]||{}).by_country||[]).forEach(c => { agg[c.name] = (agg[c.name]||0) + c.s; });
+  });
+  document.getElementById('swMapLbl').textContent = swGlobalTitle();
   const covEl = document.getElementById('swMapPeriod');
-  if(covEl) covEl.textContent = swCoverageLbl(swMapMode);
+  if(covEl) covEl.textContent = swCoverageLbl(ws);
+  if(!ws.length){
+    const empty = document.getElementById('swMap');
+    if(empty) empty.innerHTML = '<div style="grid-column:span 12;padding:26px;text-align:center;color:var(--dm);font-size:11px">Aucune semaine Sephora sur cette période — les données hebdo démarrent en janvier 2025.</div>';
+    swCountryClear();
+    return;
+  }
   const total = Object.values(agg).reduce((a,b)=>a+b, 0);
   const sorted = Object.entries(agg).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   // Largeur de chaque case proportionnelle à la part (sur 12 colonnes en CSS grid)
@@ -5107,11 +5106,11 @@ function swCountryClear(){
 function swCountryDrill(countryName){
   if(!D.sw_history) return;
   window.swCurCountry = countryName;
-  const periods = swSortedPeriods();
-  let weeksToInclude, lbl;
-  if(swMapMode === 'ytd26'){ weeksToInclude = periods.filter(p=>p.startsWith('2026')); lbl = 'YTD 2026'; }
-  else if(swMapMode === 'ytd25'){ weeksToInclude = periods.filter(p=>p.startsWith('2025')); lbl = 'YTD 2025 (N-1)'; }
-  else { weeksToInclude = [periods[periods.length-1]]; lbl = 'Sem ' + swWeekRange(periods[periods.length-1]); }
+  const weeksToInclude = swGlobalPeriods();
+  if(!weeksToInclude.length) return;
+  const lbl = (weeksToInclude.length === 1)
+            ? 'Sem ' + swWeekRange(weeksToInclude[0])
+            : swGlobalTitle() + ' · ' + weeksToInclude.length + ' sem.';
 
   // VRAIES DONNÉES PAR PAYS depuis le CSV (chaque ligne CSV = couple Country × SKU)
   let ctryS = 0, ctryQ = 0, ctryPrev = 0;
