@@ -876,11 +876,55 @@ async function askcSend(){
     <div class="bname">merci handy</div><div class="bsep"></div><div class="bsub">Revenue Dashboard</div>
   </div>
   <div class="hdr-r">
+    <small id="buildStamp" style="user-select:none;margin-right:12px;padding:2px 9px;border-radius:20px;border:1px solid var(--bd2);background:var(--sf);color:var(--dm);font-size:10px;font-weight:600;white-space:nowrap"></small>
     <small id="dataCheckBadge" style="cursor:pointer;user-select:none" onclick="toggleDataCheck()" title="Cliquer pour voir le détail">Chargement data-check…</small>
     <button id="gmToggleBtn" onclick="gmToggle()" title="Masquer la marge GM1 pour les captures clients" style="margin-left:12px;padding:3px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--dm);cursor:pointer;font-size:10px;font-weight:700;font-family:'Inter',sans-serif">🙈 Masquer GM1</button>
     <div id="dataCheckPopup" style="display:none;position:absolute;top:100%;right:24px;margin-top:6px;background:#fff;border:1px solid #ffd4e2;border-radius:14px;padding:14px 16px;box-shadow:0 8px 24px rgba(255,123,171,.18);z-index:9999;min-width:340px;max-width:420px;text-align:left;font-size:12px;color:#333"></div>
   </div>
 </div>
+
+
+<script>
+// ===== Horodatage de la derniere mise a jour =====
+// BUILD_AT est reecrit automatiquement par sources/stamp_build.js a chaque livraison.
+const BUILD_AT = "2026-08-03T15:03:27+02:00";
+(function renderBuildStamp(){
+  const el = document.getElementById('buildStamp');
+  if(!el) return;
+  const d = new Date(BUILD_AT);
+  if(isNaN(d)){ el.style.display='none'; return; }
+  const MOIS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  const p2 = n => String(n).padStart(2,'0');
+  const court = d.getDate() + ' ' + MOIS[d.getMonth()] + ', ' + p2(d.getHours()) + 'h' + p2(d.getMinutes());
+  const longue = JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear()
+               + ' à ' + p2(d.getHours()) + 'h' + p2(d.getMinutes());
+
+  const jours = Math.floor((Date.now() - d.getTime()) / 86400000);
+  const heures = Math.floor((Date.now() - d.getTime()) / 3600000);
+  let age;
+  if(heures < 1)      age = "à l'instant";
+  else if(heures < 24) age = 'il y a ' + heures + ' h';
+  else if(jours === 1) age = 'hier';
+  else                 age = 'il y a ' + jours + ' j';
+
+  // au-dela d'une semaine on le signale, au-dela de trois on alerte
+  let bg = 'var(--sf)', bd = 'var(--bd2)', fg = 'var(--dm)', ico = '🕐';
+  if(jours >= 21){ bg = '#FFE9EF'; bd = '#FFC2D4'; fg = '#C2185B'; ico = '⚠️'; }
+  else if(jours >= 7){ bg = '#FFF4E3'; bd = '#FFDFB0'; fg = '#B26A00'; ico = '🕐'; }
+  el.style.background = bg; el.style.borderColor = bd; el.style.color = fg;
+  el.textContent = ico + ' Maj ' + court;
+
+  let tip = 'Dashboard généré le ' + longue + ' (' + age + ')';
+  if(document.lastModified){
+    const f = new Date(document.lastModified);
+    if(!isNaN(f) && Math.abs(f - d) > 3600000)
+      tip += '\nFichier servi daté du ' + f.toLocaleString('fr-FR')
+           + ' — si l\'écart surprend, forcer le rechargement (cache).';
+  }
+  el.title = tip;
+})();
+</script>
 
 <div class="pbar">
   <span class="plbl">Période</span>
