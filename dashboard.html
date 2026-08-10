@@ -1693,9 +1693,12 @@ const BUILD_AT = "2026-08-10T09:08:35+02:00";
 
   <!-- TOP 20 SKUS -->
   <div class="card fw" style="margin-bottom:14px">
-    <div class="ct">Top 20 SKUs · <span class="bge bso" id="swCurModeLbl">Semaine en cours</span> <span style="margin-left:8px;font-size:9px;color:var(--dm)">Packshot · libellé · CA · part · qté · vs N-1</span> <button onclick="expSWCurrent()" style="margin-left:auto;padding:4px 10px;background:linear-gradient(135deg,#7FCFB1,#A8E6CF);border:1px solid #7FCFB1;border-radius:6px;color:#0d4d2e;cursor:pointer;font-size:10px;font-weight:700;font-family:'Inter',sans-serif">📥 Export Excel</button></div>
+    <div class="ct"><span id="swCurSkuTitle">SKUs</span> · <span class="bge bso" id="swCurModeLbl">Semaine en cours</span> <span style="margin-left:8px;font-size:9px;color:var(--dm)">Coche des produits pour voir ce qu'ils pèsent</span>
+      <button id="swSkuAllBtn" onclick="swSkuShowAll()" style="margin-left:auto;padding:4px 10px;background:transparent;border:1px solid var(--bd2);border-radius:6px;color:var(--dm);cursor:pointer;font-size:10px;font-weight:700;font-family:'Inter',sans-serif">Voir tous les SKUs</button>
+      <button onclick="expSWCurrent()" style="margin-left:8px;padding:4px 10px;background:linear-gradient(135deg,#7FCFB1,#A8E6CF);border:1px solid #7FCFB1;border-radius:6px;color:#0d4d2e;cursor:pointer;font-size:10px;font-weight:700;font-family:'Inter',sans-serif">📥 Export Excel</button></div>
+    <div id="swCurSkuSel" style="margin:0 0 10px 0;padding:10px 12px;border-radius:var(--r);background:linear-gradient(135deg,rgba(255,159,178,.10),rgba(167,139,250,.06));border:1px solid var(--p1);font-family:'Inter',sans-serif;font-size:11.5px"></div>
     <table class="tbl" style="font-size:11px;width:100%">
-      <thead><tr><th>#</th><th colspan="2">SKU</th><th class="r">CA €</th><th class="r">Part</th><th class="r">Qté</th><th class="r">vs N-1</th></tr></thead>
+      <thead><tr><th style="width:26px;text-align:center"><input type="checkbox" id="swSkuAllCb" onchange="swSkuSelectAll(this)" title="Tout sélectionner" style="width:14px;height:14px;accent-color:var(--p1);cursor:pointer"></th><th>#</th><th colspan="2">SKU</th><th class="r">CA €</th><th class="r">Part</th><th class="r">Qté</th><th class="r">vs N-1</th></tr></thead>
       <tbody id="swCurSkuT"></tbody>
     </table>
   </div>
@@ -1717,6 +1720,11 @@ const BUILD_AT = "2026-08-10T09:08:35+02:00";
 
   <div class="card fw" style="margin-bottom:14px">
     <div class="ct">CA hebdomadaire EMEA <span class="bge bso">2025-2026 · semaine par semaine</span>
+      <select id="swHistScope" onchange="swHistChartRender()" style="margin-left:12px;padding:4px 8px;background:var(--sf);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);font-size:10.5px;font-family:'Inter',sans-serif;cursor:pointer;max-width:240px"></select>
+      <label style="margin-left:10px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--dm);cursor:pointer;user-select:none;text-transform:none;letter-spacing:0">
+        <input type="checkbox" id="swHistLY" checked onchange="swHistChartRender()" style="width:13px;height:13px;accent-color:var(--p1);cursor:pointer">
+        <span>Afficher N-1</span>
+      </label>
       <div class="sel" id="swHistCtrySel" style="margin-left:auto"></div>
       <button onclick="expSWHistory()" style="margin-left:8px;padding:4px 10px;background:linear-gradient(135deg,#7FCFB1,#A8E6CF);border:1px solid #7FCFB1;border-radius:6px;color:#0d4d2e;cursor:pointer;font-size:10px;font-weight:700;font-family:'Inter',sans-serif">📥 Export 74 sem</button>
     </div>
@@ -4171,6 +4179,73 @@ function swBriefingToggle(btn){
   }
 }
 
+// ===== SÉLECTEUR DE SKU (Sephora Weekly) — poids des références cochées =====
+let SWSEL = new Set();     // Material Codes Sephora cochés
+let SWSKU_ALL = false;     // false = top 20, true = tous les SKUs
+function swSkuToggle(cb){
+  const mc = cb.dataset.mc;
+  if(cb.checked) SWSEL.add(mc); else SWSEL.delete(mc);
+  const tr = cb.closest('tr');
+  if(tr) tr.style.background = cb.checked ? 'rgba(255,159,178,.10)' : '';
+  swSkuSelBar();
+}
+function swSkuSelectAll(cb){
+  const on = !!cb.checked;
+  document.querySelectorAll('#swCurSkuT .swskcb').forEach(function(x){
+    x.checked = on;
+    if(on) SWSEL.add(x.dataset.mc); else SWSEL.delete(x.dataset.mc);
+    const tr = x.closest('tr'); if(tr) tr.style.background = on ? 'rgba(255,159,178,.10)' : '';
+  });
+  swSkuSelBar();
+}
+function swSkuShowAll(){ SWSKU_ALL = !SWSKU_ALL; buildSWCurrent(); }
+function swSkuClearSel(){
+  SWSEL.clear();
+  document.querySelectorAll('#swCurSkuT .swskcb').forEach(function(x){ x.checked=false; const tr=x.closest('tr'); if(tr) tr.style.background=''; });
+  const a=document.getElementById('swSkuAllCb'); if(a) a.checked=false;
+  swSkuSelBar();
+}
+function swSkuSelBar(){
+  const el = document.getElementById('swCurSkuSel');
+  const w  = D.sw_week;
+  if(!el || !w || !w.tot) return;
+  const t = w.tot;
+  const pickS = s => curSWView === 'week' ? (s.s||0)  : curSWView === 'ytd' ? (s.sytd||0)  : (s.sytdp||0);
+  const pickP = s => curSWView === 'week' ? (s.sp||0) : curSWView === 'ytd' ? (s.sytdp||0) : 0;
+  const pickQ = s => curSWView === 'week' ? (s.q||0)  : curSWView === 'ytd' ? (s.qytd||0)  : (s.qytdp||0);
+  // Dénominateur = total RÉEL de la période, pas la somme des lignes affichées
+  const tot = curSWView === 'week' ? (t.sales_n||0) : curSWView === 'ytd' ? (t.sales_ytd||0) : (t.sales_ytd_pn||0);
+  const totQ = curSWView === 'week' ? (t.qty_n||0)  : curSWView === 'ytd' ? (t.qty_ytd||0)  : (t.qty_ytd_pn||0);
+  const all = w.by_sku || [];
+  let s=0, p=0, q=0, n=0;
+  const names=[];
+  all.forEach(function(x){
+    if(!SWSEL.has(x.mc)) return;
+    n++; s += pickS(x); p += pickP(x); q += pickQ(x);
+    if(names.length < 4) names.push(mhResolve(x.mh, x.mc) || x.mc);
+  });
+  if(n === 0){
+    el.innerHTML = '<span style="color:var(--dm)">Coche une ou plusieurs références ci-dessous pour voir ce qu\'elles pèsent dans le sell-out Sephora (CA, part du total, unités, évolution vs N-1).</span>';
+    return;
+  }
+  const pct  = tot  > 0 ? (s/tot*100)  : 0;
+  const pctQ = totQ > 0 ? (q/totQ*100) : 0;
+  const ev   = (curSWView !== 'ytdp' && p > 0) ? ((s-p)/p*100) : null;
+  const panier = q > 0 ? (s/q) : 0;
+  const lbl = names.join(' · ') + (n > names.length ? ' +' + (n-names.length) + ' autres' : '');
+  el.innerHTML =
+     '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+   +   '<span style="font-weight:800;color:var(--p1);font-size:12.5px">' + n + ' référence' + (n>1?'s':'') + ' sélectionnée' + (n>1?'s':'') + '</span>'
+   +   '<span style="color:var(--dm)">CA <b style="color:var(--tx);font-size:13px">' + fmt(Math.round(s)) + '&euro;</b></span>'
+   +   '<span style="color:var(--dm)">Part du sell-out <b style="color:var(--p1);font-size:15px">' + pct.toFixed(1) + '%</b></span>'
+   +   '<span style="color:var(--dm)">' + fmt(Math.round(q)) + ' unités (' + pctQ.toFixed(1) + '% des volumes)</span>'
+   +   '<span style="color:var(--dm)">Panier <b style="color:var(--tx)">' + panier.toFixed(2) + '&euro;</b></span>'
+   +   (ev !== null ? '<span style="color:var(--dm)">vs N-1 ' + swEvolHtml(s, p) + '</span>' : '')
+   +   '<button onclick="swSkuClearSel()" style="margin-left:auto;padding:3px 9px;background:transparent;border:1px solid var(--bd2);border-radius:6px;color:var(--dm);cursor:pointer;font-size:10px;font-family:\'Inter\',sans-serif">Effacer</button>'
+   + '</div>'
+   + '<div style="margin-top:7px;height:7px;border-radius:4px;background:var(--bd);overflow:hidden"><div style="height:100%;width:' + Math.min(100,pct).toFixed(1) + '%;background:linear-gradient(90deg,var(--p1),#A78BFA)"></div></div>'
+   + '<div style="margin-top:5px;font-size:9.5px;color:var(--dm)">' + lbl + ' &middot; part calculée sur le total réel de la période (' + fmt(Math.round(tot)) + '&euro;)</div>';
+}
 function buildSWCurrent(){
   const w = D.sw_week;
   if(!w || !w.tot) return;
@@ -4241,14 +4316,21 @@ function buildSWCurrent(){
       const qcur = curSWView === 'week' ? s.q  : curSWView === 'ytd' ? s.qytd  : s.qytdp;
       return { ...s, _cur: cur, _prev: prev, _qty: qcur };
     }).sort((a,b) => b._cur - a._cur);
-    const totalCur = skus.reduce((a,r) => a + r._cur, 0);
-    const top20 = skus.slice(0,20);
-    tSku.innerHTML = top20.map((s,i) => {
+    // Part % TOUJOURS calculée sur le total réel de la période (jamais sur la somme du top affiché)
+    const totalCur = curSWView === 'week' ? (t.sales_n||0) : curSWView === 'ytd' ? (t.sales_ytd||0) : (t.sales_ytd_pn||0);
+    const shown = SWSKU_ALL ? skus : skus.slice(0,20);
+    const ttl = document.getElementById('swCurSkuTitle');
+    if(ttl) ttl.textContent = SWSKU_ALL ? ('Tous les SKUs ('+skus.length+')') : ('Top 20 SKUs sur '+skus.length);
+    const abtn = document.getElementById('swSkuAllBtn');
+    if(abtn) abtn.textContent = SWSKU_ALL ? 'Revenir au Top 20' : ('Voir tous les SKUs ('+skus.length+')');
+    tSku.innerHTML = shown.map((s,i) => {
       const mhCode = mhResolve(s.mh, s.mc) || s.mh || '—';
       const fullName = s.name || '';
       const ev = curSWView === 'ytdp' ? '—' : swEvolHtml(s._cur, s._prev);
       const part = totalCur > 0 ? (s._cur/totalCur*100).toFixed(1) : '0';
-      return '<tr>'
+      const isSel = SWSEL.has(s.mc);
+      return '<tr'+(isSel?' style="background:rgba(255,159,178,.10)"':'')+'>'
+        + '<td style="text-align:center"><input type="checkbox" class="swskcb" data-mc="'+s.mc+'" onchange="swSkuToggle(this)"'+(isSel?' checked':'')+' style="width:14px;height:14px;accent-color:var(--p1);cursor:pointer"></td>'
         + '<td class="rk">'+(i+1)+'</td>'
         + '<td style="width:42px;padding:2px 4px">'+packshotImg(mhCode,38)+'</td>'
         + '<td><div style="font-family:Inter,sans-serif"><div style="font-weight:700;font-size:11px;color:var(--tx)">'+mhCode+'</div><div style="font-size:9.5px;color:var(--dm);margin-top:1px">'+fullName+'</div><div style="font-size:8.5px;color:var(--dm);margin-top:1px;font-family:monospace">Sephora#'+s.mc+'</div></div></td>'
@@ -4258,6 +4340,7 @@ function buildSWCurrent(){
         + '<td class="r">'+ev+'</td>'
         + '</tr>';
     }).join('');
+    swSkuSelBar();
   }
 
   // ----- PAR PAYS (selon le mode) -----
@@ -5023,31 +5106,104 @@ function buildSWHistory(){
       sel.appendChild(btn);
     });
   }
+  swHistScopeInit();
   swHistChartRender();
+}
+
+// ----- Filtre référence / gamme de l'évolution hebdo -----
+// La sous-marque (sb) n'existe que dans D.sw_week.by_sku : on construit mc -> sb depuis là.
+let SWH_MC2SB = null;
+function swHistMcToSb(){
+  if(SWH_MC2SB) return SWH_MC2SB;
+  SWH_MC2SB = {};
+  ((D.sw_week && D.sw_week.by_sku) || []).forEach(function(x){ if(x.sb) SWH_MC2SB[x.mc] = x.sb; });
+  return SWH_MC2SB;
+}
+function swHistScopeInit(){
+  const sel = document.getElementById('swHistScope');
+  if(!sel || sel.childElementCount > 0) return;
+  const m2s = swHistMcToSb();
+  const sbs = [...new Set(Object.values(m2s))].sort();
+  // Référence = couple mc/libellé, dédoublonné sur le SKU MH quand il est connu
+  const seen = {}, refs = [];
+  swSortedPeriods().forEach(function(p){
+    ((D.sw_history[p].by_sku) || []).forEach(function(x){
+      const key = x.mc;
+      if(seen[key]) return;
+      seen[key] = 1;
+      refs.push({ mc: x.mc, lbl: (mhResolve(x.mh, x.mc) || x.mc) + ' — ' + (x.name || '') });
+    });
+  });
+  refs.sort(function(a,b){ return a.lbl.localeCompare(b.lbl); });
+  sel.innerHTML = '<option value="ALL">Toutes références</option>'
+    + '<optgroup label="Par gamme">' + sbs.map(s => '<option value="SB:' + s + '">' + s + '</option>').join('') + '</optgroup>'
+    + '<optgroup label="Par référence">' + refs.map(r => '<option value="MC:' + r.mc + '">' + r.lbl.slice(0,60) + '</option>').join('') + '</optgroup>';
+}
+// Renvoie [CA N, CA N-1] pour une semaine, selon le pays et le filtre référence/gamme actifs
+function swHistVal(p, scope){
+  const w = D.sw_history[p];
+  if(!w) return [0,0];
+  const ctry = swHistCtry;
+  if(scope === 'ALL'){
+    if(ctry === 'TOTAL') return [w.tot.s || 0, w.tot.sp || 0];
+    const c = (w.by_country || []).find(x => x.name === ctry);
+    return c ? [c.s || 0, c.sp || 0] : [0,0];
+  }
+  let rows;
+  if(ctry === 'TOTAL') rows = w.by_sku || [];
+  else {
+    const c = (w.by_country || []).find(x => x.name === ctry);
+    rows = c ? (c.sku || []) : [];
+  }
+  const m2s = swHistMcToSb();
+  const isSb = scope.slice(0,3) === 'SB:';
+  const key = scope.slice(3);
+  let s = 0, sp = 0;
+  rows.forEach(function(x){
+    const ok = isSb ? (m2s[x.mc] === key) : (x.mc === key);
+    if(!ok) return;
+    s += x.s || 0; sp += x.sp || 0;
+  });
+  return [s, sp];
 }
 function swHistChartRender(){
   const periods = swSortedPeriods();
   const labels = periods.map(p => swWeekRange(p, 'short'));
-  let series, name = swHistCtry;
-  if(swHistCtry === 'TOTAL'){
-    series = periods.map(p => D.sw_history[p].tot.s);
-  } else {
-    series = periods.map(p => {
-      const c = (D.sw_history[p].by_country || []).find(x => x.name === swHistCtry);
-      return c ? c.s : 0;
-    });
-  }
+  const scopeEl = document.getElementById('swHistScope');
+  const scope = scopeEl ? scopeEl.value : 'ALL';
+  const showLY = !document.getElementById('swHistLY') || document.getElementById('swHistLY').checked;
+  const vals = periods.map(p => swHistVal(p, scope));
+  const series = vals.map(v => v[0]);
+  const seriesLY = vals.map(v => v[1]);
+  const scopeLbl = scope === 'ALL' ? '' : (scopeEl.options[scopeEl.selectedIndex].text.split(' — ')[0]);
+  const base = 'CA hebdo ' + (swHistCtry === 'TOTAL' ? 'EMEA' : swHistCtry) + (scopeLbl ? ' · ' + scopeLbl : '');
+  const ds = [
+    { label: base, data: series, borderColor: CC.so, backgroundColor: CC.so + '22',
+      borderWidth:2, tension:.3, pointRadius:2, fill:true, order:1 }
+  ];
+  if(showLY) ds.push(
+    { label:'N-1 (même semaine)', data: seriesLY, borderColor:'#A78BFA', backgroundColor:'transparent',
+      borderWidth:1.6, borderDash:[5,4], tension:.3, pointRadius:0, fill:false, order:2 }
+  );
   const el = document.getElementById('swHistChart');
   if(!el) return;
   if(swHistChartInstance){ swHistChartInstance.destroy(); swHistChartInstance = null; }
   swHistChartInstance = new Chart(el, {
     type:'line',
-    data:{ labels, datasets:[
-      { label:'CA hebdo ' + (swHistCtry==='TOTAL' ? 'EMEA' : swHistCtry), data: series,
-        borderColor: CC.so, backgroundColor: CC.so+'22', borderWidth:2, tension:.3, pointRadius:2, fill:true }
-    ]},
-    options:{ ...BO, plugins:{...BO.plugins, legend:{display:false},
-      tooltip:{...BO.plugins.tooltip, callbacks:{ label: ctx => ' CA: ' + fmtKp(ctx.raw) + '€' }}},
+    data:{ labels, datasets: ds },
+    options:{ ...BO, plugins:{...BO.plugins,
+      legend:{ display: showLY, labels:{ boxWidth:12, font:{size:10} } },
+      tooltip:{...BO.plugins.tooltip, callbacks:{
+        label: ctx => ' ' + ctx.dataset.label + ': ' + fmtKp(ctx.raw) + '€',
+        afterBody: function(items){
+          if(!showLY || !items.length) return '';
+          const i = items[0].dataIndex;
+          const a = series[i], b = seriesLY[i];
+          if(!b) return '';
+          const d = (a-b)/b*100;
+          return '  vs N-1 : ' + (d>=0?'+':'') + d.toFixed(0) + '%';
+        }
+      }}},
       scales:{ x:{...BO.scales.x, ticks:{...BO.scales.x.ticks, maxRotation:60, minRotation:45, autoSkip:true, maxTicksLimit:20}},
                y:{...BO.scales.y, ticks:{...BO.scales.y.ticks, callback: v => fmtKp(v)+'€'}}}}
   });
