@@ -887,7 +887,7 @@ async function askcSend(){
 <script>
 // ===== Horodatage de la derniere mise a jour =====
 // BUILD_AT est reecrit automatiquement par sources/stamp_build.js a chaque livraison.
-const BUILD_AT = "2026-09-07T20:31:41+02:00";
+const BUILD_AT = "2026-09-07T20:33:34+02:00";
 (function renderBuildStamp(){
   const el = document.getElementById('buildStamp');
   if(!el) return;
@@ -1345,12 +1345,12 @@ const BUILD_AT = "2026-09-07T20:31:41+02:00";
     <canvas id="gmChart" height="103"></canvas>
     <div class="dl">
       <div class="dli"><div class="dld" style="background:var(--gm)"></div>GM1 € (barres)</div>
-      <div class="dli"><div class="dld" style="background:var(--si)"></div>CA SI (fond)</div>
+      <div class="dli"><div class="dld" style="background:var(--si)"></div>Revenue (fond)</div>
       <div class="dli"><div class="dld" style="background:var(--p1)"></div>GM1% axe droit</div>
     </div>
   </div>
   <div class="g2">
-    <div class="card"><div class="ct">GM1 par partenaire Wholesale <span class="bge bgm">période</span><button onclick="expGmPartner()" style="margin-left:auto;padding:3px 9px;background:linear-gradient(135deg,#7FCFB1,#A8E6CF);border:1px solid #7FCFB1;border-radius:5px;color:#0d4d2e;cursor:pointer;font-size:9px;font-weight:700;font-family:'Inter',sans-serif">📥 Excel</button></div><table class="tbl"><thead><tr><th>#</th><th>Partenaire</th><th class="r">CA SI</th><th class="r">GM1 €</th><th class="r">GM1%</th></tr></thead><tbody id="gmPT"></tbody></table></div>
+    <div class="card"><div class="ct">GM1 par partenaire Wholesale <span class="bge bgm">période</span><button onclick="expGmPartner()" style="margin-left:auto;padding:3px 9px;background:linear-gradient(135deg,#7FCFB1,#A8E6CF);border:1px solid #7FCFB1;border-radius:5px;color:#0d4d2e;cursor:pointer;font-size:9px;font-weight:700;font-family:'Inter',sans-serif">📥 Excel</button></div><table class="tbl"><thead><tr><th>#</th><th>Partenaire</th><th class="r">Revenue</th><th class="r">GM1 €</th><th class="r">GM1%</th></tr></thead><tbody id="gmPT"></tbody></table></div>
     <div class="card"><div class="ct">GM1% par canal</div><canvas id="gmChChart" height="150"></canvas></div>
   </div>
   <div class="card fw"><div class="ct">GM1% par SKU Wholesale — Top 15</div><canvas id="gmSkuChart" height="87"></canvas></div>
@@ -2802,7 +2802,7 @@ function mkDual(id,lbls,bg,gm,pct,pctPrev,col){
   const el=document.getElementById(id);if(!el)return;
   if(el._c){el._c.destroy();el._c=null;}
   el._c=new Chart(el,{type:'bar',data:{labels:lbls,datasets:[
-    {label:'CA SI',data:bg,backgroundColor:'rgba(255,124,92,.08)',borderColor:'rgba(255,124,92,.2)',borderWidth:1,yAxisID:'y'},
+    {label:'Revenue',data:bg,backgroundColor:'rgba(255,124,92,.08)',borderColor:'rgba(255,124,92,.2)',borderWidth:1,yAxisID:'y'},
     {label:'GM1 €',data:gm,backgroundColor:col+'aa',borderColor:col,borderWidth:1.5,borderRadius:2,yAxisID:'y'},
     {label:'GM1% N-1',data:pctPrev,type:'line',tension:.3,fill:false,borderColor:CC.p2+'88',borderWidth:1.5,borderDash:[4,3],pointRadius:0,yAxisID:'y2',spanGaps:true},
     {label:'GM1%',data:pct,type:'line',tension:.3,fill:false,borderColor:CC.p1,borderWidth:2,pointRadius:3,pointBackgroundColor:CC.p1,yAxisID:'y2',spanGaps:true}
@@ -3794,7 +3794,7 @@ function buildGM(){
   const amzT=siT_ch('Amazon',M),amzGM=siGM_ch('Amazon',M),amzP=amzT?amzGM/amzT*100:0;
   const b2bT=siT_ch('B2B',M),b2bGM=siGM_ch('B2B',M),b2bP=b2bT?b2bGM/b2bT*100:0;
   document.getElementById('kgm').innerHTML=`
-    <div class="kpi gm"><div class="kpi-lbl">GM1 total</div><div class="kpi-val">${fmtK(gmT)}€</div><div class="kpi-sub">Sur ${fmtK(siT)}€ SI</div>${evolHTML(gmT,gmT_P)}</div>
+    <div class="kpi gm"><div class="kpi-lbl">GM1 total</div><div class="kpi-val">${fmtK(gmT)}€</div><div class="kpi-sub">Sur ${fmtK(siT)}€ de revenue</div>${evolHTML(gmT,gmT_P)}</div>
     <div class="kpi gm"><div class="kpi-lbl">GM1% moyen</div><div class="kpi-val">${gmPct.toFixed(1)}%</div>${evolHTML(gmPct,gmPctP)}</div>
     <div class="kpi gm"><div class="kpi-lbl">GM1% Wholesale</div><div class="kpi-val">${wsP.toFixed(1)}%</div>${evolHTML(wsP,wsP_P)}</div>
     <div class="kpi nt"><div class="kpi-lbl">GM1% Amazon</div><div class="kpi-val">${amzP.toFixed(1)}%</div><div class="kpi-sub">Meilleure marge</div></div>
@@ -4393,7 +4393,7 @@ function expSellInPartner(){
   const rows = sorted.map(([k,v],i) => ({
     'Rang': i+1,
     'Partenaire': k,
-    'CA SI €': Math.round(v.s),
+    'Revenue €': Math.round(v.s),
     'Part %': total > 0 ? Math.round(v.s / total * 1000) / 10 : 0,
     'GM1 €': Math.round(v.gm),
     'GM1 %': v.s > 0 ? Math.round(v.gm / v.s * 1000) / 10 : null,
@@ -4517,7 +4517,7 @@ function expGmPartner(){
   const rows = Object.entries(pm).filter(([,v]) => v.s > 100).sort((a,b) => b[1].gm - a[1].gm).map(([k,v],i) => ({
     'Rang': i+1,
     'Partenaire': k,
-    'CA SI €': Math.round(v.s),
+    'Revenue €': Math.round(v.s),
     'GM1 €': Math.round(v.gm),
     'GM1 %': v.s > 0 ? Math.round(v.gm / v.s * 1000) / 10 : null,
   }));
@@ -4580,7 +4580,7 @@ function expPaysSI(){
   if(rows.length === 0){ alert('Pas de données par pays'); return; }
   // Construire avec headers génériques basés sur le nombre de colonnes
   const nCols = rows[0].length;
-  const headers = ['Pays','CA SI €','Part %','GM1 €','GM1 %','SO €','vs N-1','Ratio'].slice(0, nCols);
+  const headers = ['Pays','Revenue €','Part %','GM1 €','GM1 %','SO €','vs N-1','Ratio'].slice(0, nCols);
   const out = rows.map(r => {
     const obj = {};
     headers.forEach((h,i) => { obj[h] = r[i] || ''; });
@@ -7026,7 +7026,7 @@ function buildBudget(){
   const attCol=bgAttainColor(attain);
 
   document.getElementById('bgKPIs').innerHTML=
-    `<div class="kpi si"><div class="kpi-lbl">Réel ${lblPeriod}</div><div class="kpi-val">${fmtK(realTotal)}€</div><div class="kpi-sub">SI tous canaux</div></div>`+
+    `<div class="kpi si"><div class="kpi-lbl">Réel ${lblPeriod}</div><div class="kpi-val">${fmtK(realTotal)}€</div><div class="kpi-sub">Revenue · Wholesale + B2B + D2C + Amazon + ICO (périmètre budget)</div></div>`+
     `<div class="kpi nt"><div class="kpi-lbl">Budget ${lblPeriod}</div><div class="kpi-val">${fmtK(budgetTotal)}€</div><div class="kpi-sub">B2026</div></div>`+
     `<div class="kpi"><div class="kpi-lbl">Écart €</div><div class="kpi-val" style="color:${gap>=0?'#2A8257':'#A44A4A'}">${gap>=0?'+':''}${fmtK(gap)}€</div><div class="kpi-sub">vs Budget</div></div>`+
     `<div class="kpi"><div class="kpi-lbl">Écart %</div><div class="kpi-val" style="color:${gapPct>=0?'#2A8257':'#A44A4A'}">${gapPct>=0?'+':''}${gapPct.toFixed(1)}%</div><div class="kpi-sub">vs Budget</div></div>`+
@@ -8033,7 +8033,7 @@ function buildFrRest(){
   document.getElementById('frRestKPIs').innerHTML =
     `<div class="kpi si"><div class="kpi-lbl">France SI</div><div class="kpi-val">${fmtK(d.fr)}€</div><div class="kpi-sub">${d.fr_pct.toFixed(1)}% du total · GM1: ${d.fr_gp.toFixed(1)}%</div>${dp?evolHTML(d.fr,dp.fr):''}</div>` +
     `<div class="kpi nt"><div class="kpi-lbl">International SI</div><div class="kpi-val">${fmtK(d.rest)}€</div><div class="kpi-sub">${(100-d.fr_pct).toFixed(1)}% du total · GM1: ${d.rest_gp.toFixed(1)}%</div>${dp?evolHTML(d.rest,dp.rest):''}</div>` +
-    `<div class="kpi gm"><div class="kpi-lbl">Total SI identifié</div><div class="kpi-val">${fmtK(d.total)}€</div>${dp?evolHTML(d.total,(dp.fr||0)+(dp.rest||0)):''}</div>` +
+    `<div class="kpi gm"><div class="kpi-lbl">Revenue total identifié</div><div class="kpi-val">${fmtK(d.total)}€</div>${dp?evolHTML(d.total,(dp.fr||0)+(dp.rest||0)):''}</div>` +
     `<div class="kpi gm"><div class="kpi-lbl">GM1% FR vs Intl</div><div class="kpi-val" style="font-size:13px">${d.fr_gp.toFixed(1)}% <span style="color:var(--dm);font-size:11px">/ ${d.rest_gp.toFixed(1)}%</span></div><div class="kpi-sub">France / International</div></div>`;
 
   // Year bar chart FR vs Rest
@@ -9295,7 +9295,7 @@ function mdRender(){
   if(kpiEl){
     kpiEl.innerHTML =
       `<div class="kpi si"><div class="kpi-lbl">Revenue total · ${lbl}</div><div class="kpi-val">${fmtKp(totalPeriod)}€</div><div class="kpi-sub">Wholesale + B2B + D2C + Amazon · hors interco</div>${evolHTML(totalPeriod, totalPrev)}</div>` +
-      `<div class="kpi si"><div class="kpi-lbl">SI N-1 même période</div><div class="kpi-val">${fmtKp(totalPrev)}€</div><div class="kpi-sub">mêmes mois année précédente</div></div>` +
+      `<div class="kpi si"><div class="kpi-lbl">Revenue N-1 · même période</div><div class="kpi-val">${fmtKp(totalPrev)}€</div><div class="kpi-sub">mêmes mois année précédente</div></div>` +
       `<div class="kpi gm"><div class="kpi-lbl">GM1% pondéré</div><div class="kpi-val">${totalGMpct.toFixed(1)}%</div><div class="kpi-sub">${fmtKp(totalGM)}€ de marge</div></div>` +
       `<div class="kpi nt"><div class="kpi-lbl">Clients actifs</div><div class="kpi-val">${nbClients}</div><div class="kpi-sub">avec CA &gt; 0 sur la période</div></div>`;
   }
