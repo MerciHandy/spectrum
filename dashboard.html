@@ -887,7 +887,7 @@ async function askcSend(){
 <script>
 // ===== Horodatage de la derniere mise a jour =====
 // BUILD_AT est reecrit automatiquement par sources/stamp_build.js a chaque livraison.
-const BUILD_AT = "2026-09-07T18:58:54+02:00";
+const BUILD_AT = "2026-09-07T20:31:41+02:00";
 (function renderBuildStamp(){
   const el = document.getElementById('buildStamp');
   if(!el) return;
@@ -3146,10 +3146,10 @@ function buildSI(){
   const wsGMT=siGM_ch('Wholesale',M),wsGMPct=wsT?wsGMT/wsT*100:0;
 
   document.getElementById('ksi').innerHTML=`
-    <div class="kpi si"><div class="kpi-lbl">SI Total</div><div class="kpi-val">${fmtKp(siT)}€</div><div class="kpi-sub">Période</div>${evolHTML(siT,siT_P)}</div>
-    <div class="kpi si"><div class="kpi-lbl">Wholesale</div><div class="kpi-val">${fmtKp(wsT)}€</div><div class="kpi-sub">${pct(wsT,siT)}% du SI</div>${evolHTML(wsT,wsT_P)}</div>
-    <div class="kpi nt"><div class="kpi-lbl">B2B</div><div class="kpi-val">${fmtKp(b2bT)}€</div><div class="kpi-sub">${pct(b2bT,siT)}% du SI</div>${evolHTML(b2bT,b2bT_P)}</div>
-    <div class="kpi nt"><div class="kpi-lbl">D2C</div><div class="kpi-val">${fmtKp(d2cT)}€</div><div class="kpi-sub">${pct(d2cT,siT)}% du SI</div>${evolHTML(d2cT,d2cT_P)}</div>
+    <div class="kpi si"><div class="kpi-lbl">Revenue total</div><div class="kpi-val">${fmtKp(siT)}€</div><div class="kpi-sub">Wholesale + B2B + D2C + Amazon · hors interco</div>${evolHTML(siT,siT_P)}</div>
+    <div class="kpi si"><div class="kpi-lbl">Wholesale</div><div class="kpi-val">${fmtKp(wsT)}€</div><div class="kpi-sub">${pct(wsT,siT)}% du revenue</div>${evolHTML(wsT,wsT_P)}</div>
+    <div class="kpi nt"><div class="kpi-lbl">B2B</div><div class="kpi-val">${fmtKp(b2bT)}€</div><div class="kpi-sub">${pct(b2bT,siT)}% du revenue</div>${evolHTML(b2bT,b2bT_P)}</div>
+    <div class="kpi nt"><div class="kpi-lbl">D2C</div><div class="kpi-val">${fmtKp(d2cT)}€</div><div class="kpi-sub">${pct(d2cT,siT)}% du revenue</div>${evolHTML(d2cT,d2cT_P)}</div>
     <div class="kpi gm"><div class="kpi-lbl">GM1% Wholesale</div><div class="kpi-val">${wsGMPct.toFixed(1)}%</div><div class="kpi-sub">Canal retail</div></div>`;
 
   if(curSIView==='canal'){buildSICanal();buildSIPartnerTable();buildSIWsDonut();}
@@ -5745,7 +5745,7 @@ function buildYTD() {
   // KPIs
   const periodLbl = `Jan→${MN[+CUR.t.slice(5)-1]}`;
   document.getElementById('kytd').innerHTML =
-    `<div class="kpi si"><div class="kpi-lbl">SI Total YTD ${curY}</div><div class="kpi-val">${fmtKp(ytdTotal)}€</div><div class="kpi-sub">${ytdM.length} mois · ${periodLbl} ${curY}</div>${evolHTML(ytdTotal,ytdTotalP)}</div>` +
+    `<div class="kpi si"><div class="kpi-lbl">Revenue total YTD ${curY}</div><div class="kpi-val">${fmtKp(ytdTotal)}€</div><div class="kpi-sub">${ytdM.length} mois · ${periodLbl} ${curY} · hors interco</div>${evolHTML(ytdTotal,ytdTotalP)}</div>` +
     `<div class="kpi si"><div class="kpi-lbl">SI YTD ${prevY} (LY)</div><div class="kpi-val">${fmtKp(ytdTotalP)}€</div><div class="kpi-sub">${periodLbl} ${prevY} · même période</div></div>` +
     `<div class="kpi gm"><div class="kpi-lbl">GM1 YTD ${curY}</div><div class="kpi-val">${fmtKp(ytdGM)}€</div><div class="kpi-sub">${ytdGP.toFixed(1)}% · vs ${ytdGPp.toFixed(1)}% LY</div>${evolHTML(ytdGM,ytdGMp)}</div>` +
     chData.slice(0,2).map(d =>
@@ -9294,7 +9294,7 @@ function mdRender(){
   const kpiEl = document.getElementById('mdKPIs');
   if(kpiEl){
     kpiEl.innerHTML =
-      `<div class="kpi si"><div class="kpi-lbl">SI Total · ${lbl}</div><div class="kpi-val">${fmtKp(totalPeriod)}€</div><div class="kpi-sub">tous canaux · hors ICO/MH Corp</div>${evolHTML(totalPeriod, totalPrev)}</div>` +
+      `<div class="kpi si"><div class="kpi-lbl">Revenue total · ${lbl}</div><div class="kpi-val">${fmtKp(totalPeriod)}€</div><div class="kpi-sub">Wholesale + B2B + D2C + Amazon · hors interco</div>${evolHTML(totalPeriod, totalPrev)}</div>` +
       `<div class="kpi si"><div class="kpi-lbl">SI N-1 même période</div><div class="kpi-val">${fmtKp(totalPrev)}€</div><div class="kpi-sub">mêmes mois année précédente</div></div>` +
       `<div class="kpi gm"><div class="kpi-lbl">GM1% pondéré</div><div class="kpi-val">${totalGMpct.toFixed(1)}%</div><div class="kpi-sub">${fmtKp(totalGM)}€ de marge</div></div>` +
       `<div class="kpi nt"><div class="kpi-lbl">Clients actifs</div><div class="kpi-val">${nbClients}</div><div class="kpi-sub">avec CA &gt; 0 sur la période</div></div>`;
