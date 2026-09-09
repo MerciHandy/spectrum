@@ -144,6 +144,7 @@ select:focus{outline:none;border-color:var(--p1)}
 
 /* KPI */
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.kpis.k6{grid-template-columns:repeat(6,1fr)}
 .kpi{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;position:relative}
 .kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0}
 .kpi.si::after{background:linear-gradient(90deg,var(--si),#ffb347)}
@@ -355,6 +356,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd)}
   .tabs{padding:0 14px}
   .tab{padding:8px 10px;font-size:9.5px}
   .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpis.k6{grid-template-columns:repeat(2,1fr)}
   .g2{grid-template-columns:1fr;gap:10px}
   .card{padding:10px 12px}
   .ct{font-size:11px}
@@ -1012,7 +1014,7 @@ const BUILD_AT = "2026-09-07T20:33:34+02:00";
 <!-- SELL-IN -->
 <div class="pg on" id="pg-si">
   <div class="src-bar"><span class="src-i">📂</span><span class="src-lbl">Source</span><code>database TRF.xlsx</code><span class="src-sep">·</span><span class="src-tag">Onglet</span><code>Database revenue</code><span class="src-sep">·</span><span class="src-tag">Export Sellsy</span><span class="src-sep">·</span><span class="src-tag">Maj auto · mardi 10h</span><span class="src-sep">·</span><span class="src-tag">Hors ICO &amp; MH Corp</span></div>
-  <div class="kpis" id="ksi"></div>
+  <div class="kpis k6" id="ksi"></div>
   <div class="vsw" id="pnlBar" style="margin-bottom:12px">
     <span class="vsw-lbl">P&amp;L</span>
     <button class="sb on" onclick="setPnl('all',this)">🌍 Tout</button>
@@ -1041,6 +1043,18 @@ const BUILD_AT = "2026-09-07T20:33:34+02:00";
         </div>
       </div>
       <canvas id="siChChart" height="55"></canvas>
+    </div>
+    <div class="card fw" id="siGMCard">
+      <div class="ct">GM1 mensuelle vs N-1 <span class="bge bgm">marge brute € · 4 canaux</span>
+        <span id="siGMnote" style="margin-left:auto;font-size:9.5px;color:var(--dm);font-weight:600"></span>
+      </div>
+      <canvas id="siGMChart" height="52"></canvas>
+      <div class="skuex-legend" style="margin-top:8px">
+        <span><i style="background:#5de8b4"></i> GM1 période</span>
+        <span><i style="background:#c9c4d6"></i> GM1 N-1</span>
+        <span><i style="background:#E464F7"></i> GM1 % période</span>
+        <span><i style="background:#FEA8D9"></i> GM1 % N-1</span>
+      </div>
     </div>
     <div class="g2">
       <div class="card"><div class="ct">Partenaires Wholesale <span class="bge bgm">GM1% · période</span><button onclick="expSellInPartner()" style="margin-left:auto;padding:3px 9px;background:linear-gradient(135deg,#7FCFB1,#A8E6CF);border:1px solid #7FCFB1;border-radius:5px;color:#0d4d2e;cursor:pointer;font-size:9px;font-weight:700;font-family:'Inter',sans-serif">📥 Excel</button></div><table class="tbl"><thead><tr><th>#</th><th>Partenaire</th><th class="r">SI €</th><th class="r">Part</th><th class="r">GM1%</th></tr></thead><tbody id="siPT"></tbody></table></div>
@@ -3144,20 +3158,69 @@ function buildSI(){
   const b2bT=siT_ch('B2B',M),b2bT_P=siT_ch('B2B',MP);
   const d2cT=siT_ch('D2C',M),d2cT_P=siT_ch('D2C',MP);
   const wsGMT=siGM_ch('Wholesale',M),wsGMPct=wsT?wsGMT/wsT*100:0;
+  // GM1 totale sur le CA Global (4 canaux) — période vs même période N-1
+  const CORE4=['Wholesale','D2C','Amazon','B2B'];
+  const gmT   = CORE4.reduce((a,c)=>a+siGM_ch(c,M),0);
+  const gmT_P = CORE4.reduce((a,c)=>a+siGM_ch(c,MP),0);
+  const gmPct = siT?gmT/siT*100:0, gmPct_P = siT_P?gmT_P/siT_P*100:0;
+  const gmDlt = gmT-gmT_P;
 
   document.getElementById('ksi').innerHTML=`
     <div class="kpi si"><div class="kpi-lbl">Revenue total</div><div class="kpi-val">${fmtKp(siT)}€</div><div class="kpi-sub">Wholesale + B2B + D2C + Amazon · hors interco</div>${evolHTML(siT,siT_P)}</div>
     <div class="kpi si"><div class="kpi-lbl">Wholesale</div><div class="kpi-val">${fmtKp(wsT)}€</div><div class="kpi-sub">${pct(wsT,siT)}% du revenue</div>${evolHTML(wsT,wsT_P)}</div>
     <div class="kpi nt"><div class="kpi-lbl">B2B</div><div class="kpi-val">${fmtKp(b2bT)}€</div><div class="kpi-sub">${pct(b2bT,siT)}% du revenue</div>${evolHTML(b2bT,b2bT_P)}</div>
     <div class="kpi nt"><div class="kpi-lbl">D2C</div><div class="kpi-val">${fmtKp(d2cT)}€</div><div class="kpi-sub">${pct(d2cT,siT)}% du revenue</div>${evolHTML(d2cT,d2cT_P)}</div>
-    <div class="kpi gm"><div class="kpi-lbl">GM1% Wholesale</div><div class="kpi-val">${wsGMPct.toFixed(1)}%</div><div class="kpi-sub">Canal retail</div></div>`;
+    <div class="kpi gm"><div class="kpi-lbl">GM1 totale</div><div class="kpi-val">${fmtKp(gmT)}€</div><div class="kpi-sub">${gmPct.toFixed(1)}% du CA · ${gmDlt>=0?'+':'\u2212'}${fmtKp(Math.abs(gmDlt))}€ vs N-1</div>${evolHTML(gmT,gmT_P)}</div>
+    <div class="kpi gm"><div class="kpi-lbl">GM1% global</div><div class="kpi-val">${gmPct.toFixed(1)}%</div><div class="kpi-sub">N-1 ${gmPct_P.toFixed(1)}% · Wholesale ${wsGMPct.toFixed(1)}%</div>${(()=>{const dp=gmPct-gmPct_P;return `<div class="ev ${dp>=0?'up':'dn'}">${dp>=0?'\u2191':'\u2193'} ${Math.abs(dp).toFixed(1)} pts vs N-1</div>`;})()}</div>`;
 
-  if(curSIView==='canal'){buildSICanal();buildSIPartnerTable();buildSIWsDonut();}
+  if(curSIView==='canal'){buildSICanal();buildSIGM();buildSIPartnerTable();buildSIWsDonut();}
   else if(curSIView==='cat')buildCatView(false);
   else if(curSIView==='wscat')buildCatView(true);
   else if(curSIView==='client'){ if(ciCurrentClient && document.getElementById('ciDetail')?.style.display !== 'none') ciSelect(ciCurrentClient); else buildCITop(); }
   else if(curSIView==='monthly')mdBuild();
   else if(curSIView==='ytd')buildYTD();
+}
+// ===== GM1 mensuelle vs N-1 (CA Global, 4 canaux) =====
+function buildSIGM(){
+  const M=ms(),MP=mp(),L=labs();
+  const CORE4=['Wholesale','D2C','Amazon','B2B'];
+  const sN =M.map(m=>CORE4.reduce((a,c)=>a+siS(c,m),0));
+  const sP =MP.map(m=>CORE4.reduce((a,c)=>a+siS(c,m),0));
+  const gN =M.map(m=>CORE4.reduce((a,c)=>a+siGM(c,m),0));
+  const gP =MP.map(m=>CORE4.reduce((a,c)=>a+siGM(c,m),0));
+  const pN =gN.map((g,i)=>sN[i]>0?g/sN[i]*100:null);
+  const pP =gP.map((g,i)=>sP[i]>0?g/sP[i]*100:null);
+  // Totaux période (colonne TOTAL à droite, comme le graphe par canal)
+  const tN =gN.reduce((a,b)=>a+b,0), tP=gP.reduce((a,b)=>a+b,0), d=tN-tP;
+  const tsN=sN.reduce((a,b)=>a+b,0), tsP=sP.reduce((a,b)=>a+b,0);
+  const tpN=tsN>0?tN/tsN*100:null, tpP=tsP>0?tP/tsP*100:null;
+  const labels=[...L,'TOTAL'];
+  const note=document.getElementById('siGMnote');
+  if(note)note.innerHTML=`Cumul période : <b style="color:var(--gm)">${fmt(tN)}€</b> vs ${fmt(tP)}€ en N-1 · <b style="color:${d>=0?'var(--up)':'var(--dn)'}">${d>=0?'+':'\u2212'}${fmt(Math.abs(d))}€ (${tP?(d>=0?'+':'')+(d/Math.abs(tP)*100).toFixed(1):'—'}%)</b>`;
+  const el=document.getElementById('siGMChart');if(!el)return;
+  if(el._c){el._c.destroy();el._c=null;}
+  el._c=new Chart(el,{type:'bar',data:{labels,datasets:[
+    {label:'GM1 N-1',data:[...gP,tP],backgroundColor:'rgba(201,196,214,.45)',borderColor:'#c9c4d6',borderWidth:1,borderRadius:2,yAxisID:'y'},
+    {label:'GM1',data:[...gN,tN],backgroundColor:CC.gm+'bb',borderColor:CC.gm,borderWidth:1.5,borderRadius:2,yAxisID:'y'},
+    {label:'GM1% N-1',data:[...pP,null],type:'line',tension:.3,fill:false,borderColor:CC.p2+'99',borderWidth:1.5,borderDash:[4,3],pointRadius:0,yAxisID:'y2',spanGaps:false},
+    {label:'GM1%',data:[...pN,null],type:'line',tension:.3,fill:false,borderColor:CC.p1,borderWidth:2,pointRadius:3,pointBackgroundColor:CC.p1,yAxisID:'y2',spanGaps:false}
+  ]},options:{...BO,plugins:{...BO.plugins,legend:{display:false},
+    tooltip:{...BO.plugins.tooltip,callbacks:{
+      title:items=>{if(!items||!items.length)return'';return items[0].dataIndex===M.length?('TOTAL · '+M.length+' mois'):items[0].label;},
+      label:ctx=>ctx.dataset.yAxisID==='y2'?` ${ctx.dataset.label} : ${ctx.raw==null?'—':ctx.raw.toFixed(1)}%`:` ${ctx.dataset.label} : ${fmt(ctx.raw)}€`,
+      footer:items=>{
+        if(!items||!items.length)return'';
+        const i=items[0].dataIndex;
+        if(i===M.length)return`GM1% période : ${tpN==null?'—':tpN.toFixed(1)}% · N-1 ${tpP==null?'—':tpP.toFixed(1)}%\n${d>=0?'+':'\u2212'}${fmt(Math.abs(d))}€ vs N-1`;
+        const dm=gN[i]-gP[i];
+        return `${dm>=0?'+':'\u2212'}${fmt(Math.abs(dm))}€ vs N-1`;
+      }}}},
+    scales:{
+      x:{...BO.scales.x,ticks:{...BO.scales.x.ticks,
+        font:ctx=>({size:ctx.tick.label==='TOTAL'?11:9,family:'Inter',weight:ctx.tick.label==='TOTAL'?800:600}),
+        color:ctx=>ctx.tick.label==='TOTAL'?CC.gm:CC.dm}},
+      y:{...BO.scales.y,position:'left'},
+      y2:{position:'right',grid:{display:false},ticks:{color:CC.p1,font:{size:9},callback:v=>v+'%'},min:0,max:110}}}});
 }
 function buildSIPartnerTable(){
   const M=ms(),MP=mp();
@@ -3197,7 +3260,7 @@ function siview(view,btn){
     const el=document.getElementById(`sv-${v}-view`);
     if(el)el.style.display=(v===view)?'':'none';
   });
-  if(view==='canal'){buildSICanal();buildSIPartnerTable();buildSIWsDonut();}
+  if(view==='canal'){buildSICanal();buildSIGM();buildSIPartnerTable();buildSIWsDonut();}
   else if(view==='cat')buildCatView(false);
   else if(view==='wscat')buildCatView(true);
   else if(view==='client'){document.getElementById('ciDetail').style.display='none';document.getElementById('ciTop').style.display='block';document.getElementById('ciAC').style.display='none';document.getElementById('ciInput').value='';buildCITop();}
@@ -7835,6 +7898,7 @@ function applyGMHide(){
   document.querySelectorAll('.tab').forEach(function(t){if((t.getAttribute('onclick')||'').indexOf("go('gm')")>=0)t.style.display=hide?'none':'';});
   if(hide&&typeof curPage!=='undefined'&&curPage==='gm'){try{go('si');}catch(e){}}
   document.querySelectorAll('.kpi').forEach(function(k){var l=k.querySelector('.kpi-lbl');if(l&&/GM1/i.test(l.textContent))k.style.display=hide?'none':'';});
+  var _gmc=document.getElementById('siGMCard');if(_gmc)_gmc.style.display=hide?'none':'';
   document.querySelectorAll('table').forEach(function(tbl){
     var th=tbl.tHead;if(!th||!th.rows.length)return;var hr=th.rows[th.rows.length-1];
     var hideCols=[],ci=0;
